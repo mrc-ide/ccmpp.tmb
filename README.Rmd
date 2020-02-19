@@ -23,7 +23,7 @@ The name _leapfrog_ is in honor of [Professor](https://blogs.lshtm.ac.uk/alumni/
 
 ## Installation
 
-Install the development version from [GitHub](https://github.com/) with:
+Install the development version from [GitHub](https://github.com/mrc-ide/leapfrog) with:
 
 ``` r
 # install.packages("devtools")
