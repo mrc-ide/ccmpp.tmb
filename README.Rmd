@@ -19,7 +19,7 @@ knitr::opts_chunk$set(
 
 Leapfrog is a multistate population projection model for demographic and HIV epidemic estimation.
 
-The name _leapfrog_ is in honor of Professor Basia [Zaba](https://translate.google.co.uk/#view=home&op=translate&sl=pl&tl=en&text=%C5%BBaba).
+The name _leapfrog_ is in honor of [Professor](https://blogs.lshtm.ac.uk/alumni/2018/07/16/obituary-professor-basia-zaba/) Basia [Zaba](https://translate.google.co.uk/#view=home&op=translate&sl=pl&tl=en&text=%C5%BBaba).
 
 ## Installation
 
