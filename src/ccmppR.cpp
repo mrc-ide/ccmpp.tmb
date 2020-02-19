@@ -62,7 +62,8 @@ make_leslie_matrix(const Eigen::Array<Type, Eigen::Dynamic, 1>& sx,
 //'                     srb = 1.05,
 //'                     age_span = 5,
 //'                     fx_idx = 4)
-//' 
+//'
+//' @importClassesFrom Matrix dgCMatrix
 //' @export
 // [[Rcpp::export]]
 Eigen::SparseMatrix<double>

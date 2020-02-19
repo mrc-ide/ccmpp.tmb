@@ -17,6 +17,9 @@ make_leslie_matrixR(sx, fx, srb, age_span, fx_idx)
 
 \item{fx_idx}{first in}
 }
+\value{
+A sparse matrix representation of a Leslie matrix.
+}
 \description{
 Construct a sparse Leslie matrix
 }

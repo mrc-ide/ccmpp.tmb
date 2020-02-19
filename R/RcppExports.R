@@ -27,7 +27,8 @@
 #'                     srb = 1.05,
 #'                     age_span = 5,
 #'                     fx_idx = 4)
-#' 
+#'
+#' @importClassesFrom Matrix dgCMatrix
 #' @export
 make_leslie_matrixR <- function(sx, fx, srb, age_span, fx_idx) {
     .Call(`_leapfrog_make_leslie_matrixR`, sx, fx, srb, age_span, fx_idx)
