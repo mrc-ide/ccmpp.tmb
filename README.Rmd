@@ -17,7 +17,9 @@ knitr::opts_chunk$set(
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of leapfrog is to ...
+Leapfrog is a multistate population projection model for demographic and HIV epidemic estimation.
+
+Leapfrog is named in honor of Professor Basia [Zaba](https://translate.google.co.uk/#view=home&op=translate&sl=pl&tl=en&text=%C5%BBaba).
 
 ## Installation
 
