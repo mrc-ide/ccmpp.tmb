@@ -7,6 +7,8 @@
 
 [![Travis build
 status](https://travis-ci.org/mrc-ide/leapfrog.svg?branch=master)](https://travis-ci.org/mrc-ide/leapfrog)
+[![Codecov test
+coverage](https://codecov.io/gh/mrc-ide/leapfrog/branch/master/graph/badge.svg)](https://codecov.io/gh/mrc-ide/leapfrog?branch=master)
 <!-- badges: end -->
 
 Leapfrog is a multistate population projection model for demographic and
