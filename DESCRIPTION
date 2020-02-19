@@ -16,7 +16,8 @@ LinkingTo:
     Rcpp,
     RcppEigen
 Imports: 
-    Rcpp
+    Rcpp,
+    Matrix
 Suggests: 
     popReconstruct,
-    testthat
+    testthat (>= 2.1.0)
