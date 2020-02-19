@@ -22,7 +22,7 @@ Basia
 ## Installation
 
 Install the development version from
-[GitHub](https://github.com/mrc-ide/leapfrog) with:
+[GitHub](https://github.com/mrc-ide/leapfrog) via devtools:
 
 ``` r
 # install.packages("devtools")
