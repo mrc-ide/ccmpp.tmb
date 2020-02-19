@@ -10,12 +10,15 @@
 Leapfrog is a multistate population projection model for demographic and
 HIV epidemic estimation.
 
-The name *leapfrog* is in honor of Professor Basia
+The name *leapfrog* is in honor of
+[Professor](https://blogs.lshtm.ac.uk/alumni/2018/07/16/obituary-professor-basia-zaba/)
+Basia
 [Zaba](https://translate.google.co.uk/#view=home&op=translate&sl=pl&tl=en&text=%C5%BBaba).
 
 ## Installation
 
-Install the development version from [GitHub](https://github.com/) with:
+Install the development version from
+[GitHub](https://github.com/mrc-ide/leapfrog) with:
 
 ``` r
 # install.packages("devtools")
@@ -29,7 +32,6 @@ Construct a sparse Leslie matrix:
 ``` r
 library(leapfrog)
 library(popReconstruct)
-#> Loading required package: coda
 
 data(burkina_faso_females)
 
