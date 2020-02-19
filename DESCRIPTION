@@ -1,13 +1,13 @@
 Package: leapfrog
-Title: What the Package Does (One Line, Title Case)
+Title: Multistate Population Projection Model for Demographic and HIV Estimation
 Version: 0.0.0.9000
 Authors@R: 
-    person(given = "First",
+    person(given = "Jeffrey",
            family = "Last",
            role = c("aut", "cre"),
-           email = "first.last@example.com",
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
+           email = "jeffrey.eaton@imperial.ac.uk",
+           comment = c(ORCID = "0000-0001-7728-728X"))
+Description: Leapfrog is a multistate population projection model for estimating population, demographic indicators, and HIV epidemic. The model combines a standard cohort component model of population projection (CCMPP) with a multistate model for HIV infection, disease progression, and treatment. Statistical tools are implemented for joint inference from multiple demographic and epidemiologic data sources.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
@@ -17,3 +17,6 @@ LinkingTo:
     RcppEigen
 Imports: 
     Rcpp
+Suggests: 
+    popReconstruct,
+    testthat
