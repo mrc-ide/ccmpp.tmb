@@ -48,3 +48,27 @@ make_leslie_matrixR(sx = burkina.faso.females$survival.proportions[,1],
                     age_span = 5,
                     fx_idx = 4)
 ```
+
+
+### TMB 
+
+Calculate a population projection in TMB.
+
+```{r tmb_example}
+library(TMB)
+
+data <- list(basepop = as.vector(burkina.faso.females$baseline.pop.counts),
+             sx = burkina.faso.females$survival.proportions[,1],
+             fx = burkina.faso.females$fertility.rates[4:10, 1],
+             srb = 1.05,
+             age_span = 5,
+             fx_idx = 4)
+par <- list(theta = 0)
+
+obj <- MakeADFun(data = data, parameters = par,
+                 DLL = "leapfrog", silent = TRUE)
+
+obj$fn()
+obj$report()
+
+```

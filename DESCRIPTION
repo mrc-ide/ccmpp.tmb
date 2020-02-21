@@ -14,10 +14,12 @@ LazyData: true
 RoxygenNote: 7.0.2
 LinkingTo: 
     Rcpp,
-    RcppEigen
+    RcppEigen,
+    TMB
 Imports: 
+    Matrix,
     Rcpp,
-    Matrix
+    TMB    
 Suggests: 
     popReconstruct,
     testthat (>= 2.1.0),
