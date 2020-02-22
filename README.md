@@ -118,5 +118,8 @@ obj$report()
         with extension `.pp`. The model name must match the file name.
         The signature is slightly different – see other `.hpp` files for
         example.
-      - Call `TMBtools::export_models()` to export any changes to the
-        TMB models before compiling.
+      - Call `TMBtools::export_models()` to export the new TMB model to
+        the meta-model list.
+      - When constructing the objective function with `TMB::MakeADFun`,
+        use `DLL= "leapfrog_TMBExports"` and add an additional value
+        `model = "<model_name>"` to the `data` list.

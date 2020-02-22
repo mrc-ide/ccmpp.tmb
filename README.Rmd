@@ -78,4 +78,5 @@ obj$report()
 
 * TMB model code and testing are implemented following templates from the [`TMBtools`](https://github.com/mlysy/TMBtools) package with guidance for package development with both TMB models and Rcpp code. 
   * To add a new TMB model, save the model template in the `src/TMB` with extension `.pp`. The model name must match the file name. The signature is slightly different -- see other `.hpp` files for example.
-  * Call `TMBtools::export_models()` to export any changes to the TMB models before compiling.
+  * Call `TMBtools::export_models()` to export the new TMB model to the meta-model list.
+  * When constructing the objective function with `TMB::MakeADFun`, use `DLL= "leapfrog_TMBExports"` and add an additional value `model = "<model_name>"` to the `data` list.
