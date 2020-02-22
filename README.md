@@ -9,6 +9,8 @@
 status](https://travis-ci.org/mrc-ide/leapfrog.svg?branch=master)](https://travis-ci.org/mrc-ide/leapfrog)
 [![Codecov test
 coverage](https://codecov.io/gh/mrc-ide/leapfrog/branch/master/graph/badge.svg)](https://codecov.io/gh/mrc-ide/leapfrog?branch=master)
+[![AppVeyor build
+status](https://ci.appveyor.com/api/projects/status/github/mrc-ide/leapfrog?branch=master&svg=true)](https://ci.appveyor.com/project/mrc-ide/leapfrog)
 <!-- badges: end -->
 
 Leapfrog is a multistate population projection model for demographic and
@@ -36,6 +38,7 @@ Construct a sparse Leslie matrix:
 ``` r
 library(leapfrog)
 library(popReconstruct)
+#> Loading required package: coda
 
 data(burkina_faso_females)
 
@@ -82,3 +85,44 @@ make_leslie_matrixR(sx = burkina.faso.females$survival.proportions[,1],
 #> [16,] 0.4547571 .         .        
 #> [17,] .         0.3181678 0.2099861
 ```
+
+### TMB
+
+Calculate a population projection in TMB.
+
+``` r
+library(TMB)
+
+data <- list(basepop = as.vector(burkina.faso.females$baseline.pop.counts),
+             sx = burkina.faso.females$survival.proportions[,1],
+             fx = burkina.faso.females$fertility.rates[4:10, 1],
+             srb = 1.05,
+             age_span = 5,
+             fx_idx = 4)
+par <- list(theta = 0)
+
+obj <- MakeADFun(data = c(model = "ccmpp_tmb", data), parameters = par,
+                 DLL = "leapfrog_TMBExports", silent = TRUE)
+
+obj$fn()
+#> [1] 0
+obj$report()
+#> $projpop
+#>  [1] 509479.592 338995.727 283642.516 252988.270 233696.092 196272.333 165551.320 143724.612 124993.657 105911.711  85786.913  64922.365  46416.989
+#> [14]  29954.307  17193.530   7730.870   2965.314
+```
+
+## Development notes
+
+  - TMB model code and testing are implemented following templates from
+    the [`TMBtools`](https://github.com/mlysy/TMBtools) package with
+    guidance for package development with both TMB models and Rcpp code.
+      - To add a new TMB model, save the model template in the `src/TMB`
+        with extension `.pp`. The model name must match the file name.
+        The signature is slightly different – see other `.hpp` files for
+        example.
+      - Call `TMBtools::export_models()` to export the new TMB model to
+        the meta-model list.
+      - When constructing the objective function with `TMB::MakeADFun`,
+        use `DLL= "leapfrog_TMBExports"` and add an additional value
+        `model = "<model_name>"` to the `data` list.

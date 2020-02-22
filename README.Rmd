@@ -17,6 +17,7 @@ knitr::opts_chunk$set(
 <!-- badges: start -->
 [![Travis build status](https://travis-ci.org/mrc-ide/leapfrog.svg?branch=master)](https://travis-ci.org/mrc-ide/leapfrog)
 [![Codecov test coverage](https://codecov.io/gh/mrc-ide/leapfrog/branch/master/graph/badge.svg)](https://codecov.io/gh/mrc-ide/leapfrog?branch=master)
+[![AppVeyor build status](https://ci.appveyor.com/api/projects/status/github/mrc-ide/leapfrog?branch=master&svg=true)](https://ci.appveyor.com/project/mrc-ide/leapfrog)
 <!-- badges: end -->
 
 Leapfrog is a multistate population projection model for demographic and HIV epidemic estimation.
@@ -65,10 +66,18 @@ data <- list(basepop = as.vector(burkina.faso.females$baseline.pop.counts),
              fx_idx = 4)
 par <- list(theta = 0)
 
-obj <- MakeADFun(data = data, parameters = par,
-                 DLL = "leapfrog", silent = TRUE)
+obj <- MakeADFun(data = c(model = "ccmpp_tmb", data), parameters = par,
+                 DLL = "leapfrog_TMBExports", silent = TRUE)
 
 obj$fn()
 obj$report()
 
 ```
+
+
+## Development notes
+
+* TMB model code and testing are implemented following templates from the [`TMBtools`](https://github.com/mlysy/TMBtools) package with guidance for package development with both TMB models and Rcpp code. 
+  * To add a new TMB model, save the model template in the `src/TMB` with extension `.pp`. The model name must match the file name. The signature is slightly different -- see other `.hpp` files for example.
+  * Call `TMBtools::export_models()` to export the new TMB model to the meta-model list.
+  * When constructing the objective function with `TMB::MakeADFun`, use `DLL= "leapfrog_TMBExports"` and add an additional value `model = "<model_name>"` to the `data` list.
