@@ -9,6 +9,8 @@
 status](https://travis-ci.org/mrc-ide/leapfrog.svg?branch=master)](https://travis-ci.org/mrc-ide/leapfrog)
 [![Codecov test
 coverage](https://codecov.io/gh/mrc-ide/leapfrog/branch/master/graph/badge.svg)](https://codecov.io/gh/mrc-ide/leapfrog?branch=master)
+[![AppVeyor build
+status](https://ci.appveyor.com/api/projects/status/github/mrc-ide/leapfrog?branch=master&svg=true)](https://ci.appveyor.com/project/mrc-ide/leapfrog)
 <!-- badges: end -->
 
 Leapfrog is a multistate population projection model for demographic and
@@ -36,6 +38,7 @@ Construct a sparse Leslie matrix:
 ``` r
 library(leapfrog)
 library(popReconstruct)
+#> Loading required package: coda
 
 data(burkina_faso_females)
 
