@@ -72,9 +72,9 @@ Calculate a population projection in TMB.
 library(TMB)
 
 data <- list(basepop = as.vector(burkina.faso.females$baseline.pop.counts),
-             sx = burkina.faso.females$survival.proportions[,1],
-             fx = burkina.faso.females$fertility.rates[4:10, 1],
-             srb = 1.05,
+             sx = burkina.faso.females$survival.proportions,
+             fx = burkina.faso.females$fertility.rates[4:10, ],
+             srb = rep(1.05, ncol(burkina.faso.females$survival.proportions)),
              age_span = 5,
              fx_idx = 4)
 par <- list(theta = 0)
@@ -83,7 +83,7 @@ obj <- MakeADFun(data = c(model = "ccmpp_tmb", data), parameters = par,
                  DLL = "leapfrog_TMBExports", silent = TRUE)
 
 obj$fn()
-obj$report()
+obj$report()$projpop[ , c(1, 2, 10)]
 
 ```
 
