@@ -76,14 +76,20 @@ data <- list(basepop = as.vector(burkina.faso.females$baseline.pop.counts),
              fx = burkina.faso.females$fertility.rates[4:10, ],
              srb = rep(1.05, ncol(burkina.faso.females$survival.proportions)),
              age_span = 5,
-             fx_idx = 4)
-par <- list(theta = 0)
+             fx_idx = 4,
+             census_log_pop = log(burkina.faso.females$census.pop.counts),
+             census_year_idx = c(3L, 5L, 7L, 9L))
+par <- list(log_sigma_logpop = 0)
 
 obj <- MakeADFun(data = c(model = "ccmpp_tmb", data), parameters = par,
                  DLL = "leapfrog_TMBExports", silent = TRUE)
 
 obj$fn()
-obj$report()$projpop[ , c(1, 2, 10)]
+obj$report()$projpop[ , data$census_year_idx]
+
+fit <- nlminb(obj$par, obj$fn, obj$gr, control = list(trace = 1))
+
+fit              
 
 ```
 
