@@ -19,7 +19,7 @@ LinkingTo:
 Imports: 
     Matrix,
     Rcpp,
-    TMB    
+    TMB (>= 1.7.16)
 Suggests: 
     popReconstruct,
     testthat (>= 2.1.0),

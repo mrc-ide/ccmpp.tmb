@@ -1,8 +1,13 @@
-#include <TMB.hpp>
-#include "ccmpp.h"
+#ifndef CCMPP_TMB_HPP
+#define CCMPP_TMB_HPP
+
+#undef TMB_OBJECTIVE_PTR
+#define TMB_OBJECTIVE_PTR obj
+
+#include "../ccmpp.h"
 
 template<class Type>
-Type objective_function<Type>::operator() ()
+Type ccmpp_tmb(objective_function<Type>* obj)
 {
 
   DATA_VECTOR(basepop);
@@ -22,3 +27,8 @@ Type objective_function<Type>::operator() ()
 
   return Type(0);
 }
+
+#undef TMB_OBJECTIVE_PTR
+#define TMB_OBJECTIVE_PTR this
+
+#endif

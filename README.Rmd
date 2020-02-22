@@ -65,10 +65,17 @@ data <- list(basepop = as.vector(burkina.faso.females$baseline.pop.counts),
              fx_idx = 4)
 par <- list(theta = 0)
 
-obj <- MakeADFun(data = data, parameters = par,
-                 DLL = "leapfrog", silent = TRUE)
+obj <- MakeADFun(data = c(model = "ccmpp_tmb", data), parameters = par,
+                 DLL = "leapfrog_TMBExports", silent = TRUE)
 
 obj$fn()
 obj$report()
 
 ```
+
+
+## Development notes
+
+* TMB model code and testing are implemented following templates from the [`TMBtools`](https://github.com/mlysy/TMBtools) package with guidance for package development with both TMB models and Rcpp code. 
+  * To add a new TMB model, save the model template in the `src/TMB` with extension `.pp`. The model name must match the file name. The signature is slightly different -- see other `.hpp` files for example.
+  * Call `TMBtools::export_models()` to export any changes to the TMB models before compiling.
