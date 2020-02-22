@@ -38,7 +38,6 @@ Construct a sparse Leslie matrix:
 ``` r
 library(leapfrog)
 library(popReconstruct)
-#> Loading required package: coda
 
 data(burkina_faso_females)
 
@@ -84,6 +83,36 @@ make_leslie_matrixR(sx = burkina.faso.females$survival.proportions[,1],
 #> [15,] .         .         .        
 #> [16,] 0.4547571 .         .        
 #> [17,] .         0.3181678 0.2099861
+```
+
+Simulate a cohort component population projection:
+
+``` r
+pop_proj <- ccmppR(basepop = as.numeric(burkina.faso.females$baseline.pop.counts),
+                   sx = burkina.faso.females$survival.proportions,
+                   fx = burkina.faso.females$fertility.rates[4:10, ],
+                   srb = rep(1.05, ncol(burkina.faso.females$survival.proportions)),
+                   age_span = 5,
+                   fx_idx = 4)
+pop_proj[ , c(1, 2, ncol(pop_proj))]
+#>         [,1]       [,2]       [,3]
+#>  [1,] 386000 509479.592 1626384.22
+#>  [2,] 292000 338995.727 1327935.93
+#>  [3,] 260000 283642.516 1134044.00
+#>  [4,] 244000 252988.270  960417.99
+#>  [5,] 207000 233696.092  798458.66
+#>  [6,] 175000 196272.333  657179.40
+#>  [7,] 153000 165551.320  546359.28
+#>  [8,] 135000 143724.612  462499.51
+#>  [9,] 117000 124993.657  375389.32
+#> [10,]  98000 105911.711  261561.20
+#> [11,]  78000  85786.913  205876.07
+#> [12,]  60000  64922.365  166899.67
+#> [13,]  43000  46416.989  135244.35
+#> [14,]  29000  29954.307   93073.59
+#> [15,]  17000  17193.530   56542.05
+#> [16,]   8000   7730.870   28184.57
+#> [17,]   2000   2965.314   13474.58
 ```
 
 ### TMB

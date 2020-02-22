@@ -34,3 +34,31 @@ make_leslie_matrixR <- function(sx, fx, srb, age_span, fx_idx) {
     .Call(`_leapfrog_make_leslie_matrixR`, sx, fx, srb, age_span, fx_idx)
 }
 
+#' Simulate cohort component population projection
+#'
+#' @param basepop vector of baseline population size.
+#' @param sx a matrix of survivorship probabilities with column for each
+#'           projection step.
+#' @param fx a matrix of fertility rates, only amongst fertile ages, with
+#'           column for each projection step.
+#' @param srb a vector of sex ratio at birth.
+#' @param age_span the interval for age and projection time step.
+#' @param fx_idx first in
+#'
+#' @return A matrix of projected population at each step
+#'
+#' @examples
+#'
+#' library(popReconstruct)
+#' data(burkina_faso_females)
+#' ccmppR(basepop = as.numeric(burkina.faso.females$baseline.pop.counts),
+#'        sx = burkina.faso.females$survival.proportions,
+#'        fx = burkina.faso.females$fertility.rates[4:10, 1],
+#'        srb = rep(1.05, ncol(burkina.faso.females$survival.proportions)),
+#'        age_span = 5,
+#'        fx_idx = 4)
+#' @export
+ccmppR <- function(basepop, sx, fx, srb, age_span, fx_idx) {
+    .Call(`_leapfrog_ccmppR`, basepop, sx, fx, srb, age_span, fx_idx)
+}
+

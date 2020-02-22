@@ -50,6 +50,19 @@ make_leslie_matrixR(sx = burkina.faso.females$survival.proportions[,1],
                     fx_idx = 4)
 ```
 
+Simulate a cohort component population projection:
+
+```{r ccmpp_sim}
+pop_proj <- ccmppR(basepop = as.numeric(burkina.faso.females$baseline.pop.counts),
+                   sx = burkina.faso.females$survival.proportions,
+                   fx = burkina.faso.females$fertility.rates[4:10, ],
+                   srb = rep(1.05, ncol(burkina.faso.females$survival.proportions)),
+                   age_span = 5,
+                   fx_idx = 4)
+pop_proj[ , c(1, 2, ncol(pop_proj))]
+
+```
+
 
 ### TMB 
 
