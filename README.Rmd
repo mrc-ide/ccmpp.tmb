@@ -70,7 +70,6 @@ pop_proj[ , c(1, 2, ncol(pop_proj))]
 Calculate a population projection in TMB.
 
 ```{r tmb_example}
-library(TMB)
 
 log_basepop_mean <- as.vector(log(burkina.faso.females$baseline.pop.counts))
 logit_sx_mean <- as.vector(qlogis(burkina.faso.females$survival.proportions))
@@ -97,10 +96,7 @@ par <- list(log_tau2_logpop = 0,
             log_fx = log_fx_mean,
             gx = gx_mean)
 
-obj <- MakeADFun(data = c(model = "ccmpp_tmb", data),
-                 parameters = par,
-                 random = c("log_basepop", "logit_sx", "log_fx", "gx"),
-                 DLL = "leapfrog_TMBExports", silent = TRUE)
+obj <- make_tmb_obj(data, par)
 
 obj$fn()
 obj$report()

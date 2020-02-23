@@ -2,6 +2,7 @@
 
 export(ccmppR)
 export(make_leslie_matrixR)
+export(make_tmb_obj)
 importClassesFrom(Matrix,dgCMatrix)
 importFrom(Rcpp,sourceCpp)
 useDynLib(leapfrog, .registration = TRUE)
