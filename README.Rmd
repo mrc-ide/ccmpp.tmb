@@ -11,6 +11,8 @@ knitr::opts_chunk$set(
   fig.path = "man/figures/README-",
   out.width = "100%"
 )
+
+options(tidyverse.quiet = TRUE)
 ```
 # leapfrog
 
@@ -38,6 +40,7 @@ devtools::install_github("mrc-ide/leapfrog")
 Construct a sparse Leslie matrix:
 
 ```{r example}
+library(tidyverse)
 library(leapfrog)
 library(popReconstruct)
 
@@ -50,34 +53,186 @@ make_leslie_matrixR(sx = burkina.faso.females$survival.proportions[,1],
                     fx_idx = 4)
 ```
 
+Simulate a cohort component population projection:
 
-### TMB 
-
-Calculate a population projection in TMB.
-
-```{r tmb_example}
-library(TMB)
-
-data <- list(basepop = as.vector(burkina.faso.females$baseline.pop.counts),
-             sx = burkina.faso.females$survival.proportions[,1],
-             fx = burkina.faso.females$fertility.rates[4:10, 1],
-             srb = 1.05,
-             age_span = 5,
-             fx_idx = 4)
-par <- list(theta = 0)
-
-obj <- MakeADFun(data = c(model = "ccmpp_tmb", data), parameters = par,
-                 DLL = "leapfrog_TMBExports", silent = TRUE)
-
-obj$fn()
-obj$report()
+```{r ccmpp_sim}
+pop_proj <- ccmppR(basepop = as.numeric(burkina.faso.females$baseline.pop.counts),
+                   sx = burkina.faso.females$survival.proportions,
+                   fx = burkina.faso.females$fertility.rates[4:10, ],
+                   gx = burkina.faso.females$migration.proportions,
+                   srb = rep(1.05, ncol(burkina.faso.females$survival.proportions)),
+                   age_span = 5,
+                   fx_idx = 4)
+pop_proj[ , c(1, 2, ncol(pop_proj))]
 
 ```
 
 
+### TMB 
+
+Calculate a population projection in TMB. Carry forward 2000 values for two further periods
+to explore projections.
+
+```{r tmb_example}
+
+basepop_init <- as.numeric(burkina.faso.females$baseline.pop.counts)
+
+sx_init <- burkina.faso.females$survival.proportions
+sx_init <- cbind(sx_init, `2005` = sx_init[ , "2000"], `2010` = sx_init[ , "2000"])
+
+fx_init <- burkina.faso.females$fertility.rates[4:10, ]
+fx_init <- cbind(fx_init, `2005` = fx_init[ , "2000"], `2010` = fx_init[ , "2000"])
+
+gx_init <- burkina.faso.females$migration.proportions
+gx_init <- cbind(gx_init, `2005` = gx_init[ , "2000"], `2010` = gx_init[ , "2000"])
+
+log_basepop_mean <- as.vector(log(basepop_init))
+logit_sx_mean <- as.vector(qlogis(sx_init))
+log_fx_mean <- as.vector(log(fx_init))
+gx_mean <- as.vector(gx_init)
+  
+data <- list(log_basepop_mean = log_basepop_mean,
+             logit_sx_mean = logit_sx_mean,
+             log_fx_mean = log_fx_mean,
+             gx_mean = gx_mean,
+             srb = rep(1.05, ncol(sx_init)),
+             age_span = 5,
+             n_steps = ncol(sx_init),
+             fx_idx = 4L,
+             fx_span = 7L,
+             census_log_pop = log(burkina.faso.females$census.pop.counts),
+             census_year_idx = c(4L, 6L, 8L, 10L))
+par <- list(log_tau2_logpop = 0,
+            log_tau2_sx = 0,
+            log_tau2_fx = 0,
+            log_tau2_gx = 0,
+            log_basepop = log_basepop_mean,
+            logit_sx = logit_sx_mean,
+            log_fx = log_fx_mean,
+            gx = gx_mean)
+
+obj <- make_tmb_obj(data, par)
+
+obj$fn()
+
+matrix(obj$report()$population, nrow = 17)[ , data$census_year_idx]
+
+input <- list(data = data, par_init = par)
+fit <- fit_tmb(input)
+
+fit[1:6]
+
+```
+
+Sample from posterior distribution and generate outputs
+
+```{r sample_tmb}
+fit <- sample_tmb(fit)
+
+colnames(fit$sample$population) <- 1:ncol(fit$sample$population)
+
+init_pop_mat <- ccmppR(basepop_init, sx_init, fx_init, gx_init,
+                       srb = rep(1.05, ncol(sx_init)), age_span = 5, fx_idx = 4)
+
+df <- crossing(year = seq(1960, 2015, 5),
+               sex = "female",
+               age_group = c(sprintf("%02d-%02d", 0:15*5, 0:15*5+4), "80+")) %>%
+  mutate(init_pop = as.vector(init_pop_mat))
+
+census_pop <- crossing(sex = "female",
+                       age_group = c(sprintf("%02d-%02d", 0:15*5, 0:15*5+4), "80+")) %>%
+  bind_cols(as.tibble(burkina.faso.females$census.pop.counts)) %>%
+  gather(year, census_pop, `1975`:`2005`) %>%
+  type_convert(cols(year = col_double()))
+
+df <- df %>%
+  left_join(census_pop) %>%
+  bind_cols(as.tibble(fit$sample$population)) %>%
+  gather(sample, value, `1`:last_col()) %>%
+  group_by(year, sex, age_group)
+
+agepop <- df %>%
+  group_by(year, sex, age_group) %>%
+  summarise(init_pop = mean(init_pop),
+            census_pop = mean(census_pop),
+            mean = mean(value),
+            lower = quantile(value, 0.025),
+            upper = quantile(value, 0.975))
+
+totalpop <- df %>%
+  group_by(year, sample) %>%
+  summarise(init_pop = sum(init_pop),
+            census_pop = sum(census_pop),
+            value = sum(value)) %>%
+  group_by(year) %>%
+  summarise(init_pop = mean(init_pop),
+            census_pop = mean(census_pop),
+            mean = mean(value),
+            lower = quantile(value, 0.025),
+            upper = quantile(value, 0.975))
+```
+
+```{r, fig.height = 3, fig.width = 4, fig.align = "center"}
+ggplot(totalpop, aes(year, mean, ymin = lower, ymax = upper)) +
+  geom_ribbon(alpha = 0.2) +
+  geom_line() +
+  geom_line(aes(y = init_pop), linetype = "dashed") +
+  geom_point(aes(y = census_pop), shape = 4, color = "darkred", stroke = 2) +
+  scale_y_continuous("Total population (millions)", labels = scales::number_format(scale = 1e-6)) +
+  expand_limits(y = 0) +
+  labs(x = NULL) +
+  theme_light() +
+  ggtitle("BFA females: total population")
+```
+
+```{r, fig.height = 5, fig.width = 7, fig.align = "center"}
+ggplot(agepop, aes(age_group, mean, ymin = lower, ymax = upper, group = 1)) +
+  geom_ribbon(alpha = 0.2) +
+  geom_line() +
+  geom_line(aes(y = init_pop), linetype = "dashed") +
+  geom_point(aes(y = census_pop), color = "darkred") +
+  facet_wrap(~year, scales = "free_y") + 
+  scale_y_continuous("Total population (thousands)", labels = scales::number_format(scale = 1e-3)) +
+  expand_limits(y = 0) +
+  theme_light() +
+  theme(axis.text.x = element_text(angle = 30, hjust = 1),
+        panel.grid = element_blank()) +
+  ggtitle("BFA females: population by age")
+```
+
+
+
 ## Development notes
 
-* TMB model code and testing are implemented following templates from the [`TMBtools`](https://github.com/mlysy/TMBtools) package with guidance for package development with both TMB models and Rcpp code. 
+The simulation model is implemented as templated C++ code in `src/ccmpp.h` 
+such that the simulation model may be developed as a standalone C++ library
+that can be called by other software without requiring R-specific code features.
+
+* Presently the CCMPP model is implemented as a sparse Leslie matrix formulation. 
+  In future, this will probably be split into multiple steps to save intermediate
+  computations of demographic events (births, deaths, migrations).
+* In future a class structure will probably be developed.
+* Specifying static dimensions for the state space may improve efficiency. This 
+  should be possible for common options (5x5 year, 1x1 year) through templating.
+  
+The file `src/ccmppR.cpp` contains R wrapper functions for the model simulation 
+via [Rcpp](http://dirk.eddelbuettel.com/code/rcpp.html) and 
+[RcppEigen](http://dirk.eddelbuettel.com/code/rcpp.eigen.html).
+  
+The objective function (the negative log posterior) is implemented in templated 
+C++ code using probability functions from the Template Model Builder 
+([TMB](https://github.com/kaskr/adcomp/wiki)) R package. Implementation in TMB
+provides gradient functions via automatic differentiation (AD).
+
+* Further investigation is needed about the portability of AD objective function
+  DLLs outside of the R environment.
+
+TMB also contains R functions for approximation integration of arbitrary random
+effects via Laplace approximation.
+
+TMB model code and testing are implemented following templates from the 
+[`TMBtools`](https://github.com/mlysy/TMBtools) package with guidance for package 
+development with both TMB models and Rcpp code. 
   * To add a new TMB model, save the model template in the `src/TMB` with extension `.pp`. The model name must match the file name. The signature is slightly different -- see other `.hpp` files for example.
   * Call `TMBtools::export_models()` to export the new TMB model to the meta-model list.
   * When constructing the objective function with `TMB::MakeADFun`, use `DLL= "leapfrog_TMBExports"` and add an additional value `model = "<model_name>"` to the `data` list.

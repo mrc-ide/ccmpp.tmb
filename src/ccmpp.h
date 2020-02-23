@@ -4,7 +4,7 @@
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
 
-template <class Type>
+template <typename Type>
 Eigen::SparseMatrix<Type>
 make_leslie_matrix(const Eigen::Array<Type, Eigen::Dynamic, 1>& sx,
                    const Eigen::Array<Type, Eigen::Dynamic, 1>& fx,
@@ -38,4 +38,28 @@ make_leslie_matrix(const Eigen::Array<Type, Eigen::Dynamic, 1>& sx,
   return leslie;
 }
 
+template <typename Type>
+Eigen::Matrix<Type, Eigen::Dynamic, Eigen::Dynamic>
+ccmpp(const Eigen::Matrix<Type, Eigen::Dynamic, 1>& basepop,
+      const Eigen::Array<Type, Eigen::Dynamic, Eigen::Dynamic>& sx,
+      const Eigen::Array<Type, Eigen::Dynamic, Eigen::Dynamic>& fx,
+      const Eigen::Array<Type, Eigen::Dynamic, Eigen::Dynamic>& gx,
+      const Eigen::Array<Type, Eigen::Dynamic, 1>& srb,
+      const Type age_span,
+      const int fx_idx) {
+
+  int nsteps(sx.cols());
+  Eigen::Matrix<Type, Eigen::Dynamic, Eigen::Dynamic> population(basepop.rows(), nsteps + 1);
+
+  population.col(0) = basepop;
+  for(int step = 0; step < nsteps; step++) {
+    Eigen::Matrix<Type, Eigen::Dynamic, 1> migrants(population.col(step).array() *
+						    gx.col(step));
+    Eigen::SparseMatrix<Type> leslie(make_leslie_matrix<Type>(sx.col(step), fx.col(step), srb[step], age_span, fx_idx));
+    population.col(step + 1) = leslie * (population.col(step) + 0.5 * migrants) + 0.5 * migrants;
+  }
+
+  return population;
+}
+  
 #endif

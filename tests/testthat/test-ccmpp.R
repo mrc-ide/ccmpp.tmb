@@ -17,3 +17,26 @@ test_that("sparse leslie matrix returns expected matrix", {
 
   expect_equal(make_leslie_matrixR(surv, fert, srb, age_span, fx_idx), lesM)
 })
+
+test_that("population projection matches popReconstruct implementation", {
+
+  data(burkina_faso_females, package = "popReconstruct")
+  bff <- burkina.faso.females
+
+  popproj_check <- popReconstruct::popRecon.ccmp.female(
+                                     pop = bff$baseline.pop.counts,
+                                     surv = bff$survival.proportions,
+                                     fert = bff$fertility.rates,
+                                     mig = bff$migration.proportions)
+  
+  popproj <- ccmppR(basepop = as.numeric(bff$baseline.pop.counts),
+                    sx = bff$survival.proportions,
+                    fx = bff$fertility.rates[4:10, ],
+                    gx = bff$migration.proportions,
+                    srb = rep(1.05, ncol(bff$survival.proportions)),
+                    age_span = 5,
+                    fx_idx = 4)
+
+  expect_equal(popproj, popproj_check)
+  
+})
