@@ -17,7 +17,7 @@ LinkingTo:
     RcppEigen,
     TMB
 Imports:
-    methods
+    methods,
     Matrix,
     Rcpp,
     TMB (>= 1.7.16)
