@@ -36,6 +36,7 @@ devtools::install_github("mrc-ide/leapfrog")
 Construct a sparse Leslie matrix:
 
 ``` r
+library(tidyverse)
 library(leapfrog)
 library(popReconstruct)
 
@@ -118,22 +119,34 @@ pop_proj[ , c(1, 2, ncol(pop_proj))]
 
 ### TMB
 
-Calculate a population projection in TMB.
+Calculate a population projection in TMB. Carry forward 2000 values for
+two further periods to explore projections.
 
 ``` r
 
-log_basepop_mean <- as.vector(log(burkina.faso.females$baseline.pop.counts))
-logit_sx_mean <- as.vector(qlogis(burkina.faso.females$survival.proportions))
-log_fx_mean <- as.vector(log(burkina.faso.females$fertility.rates[4:10, ]))
-gx_mean <- as.vector(burkina.faso.females$migration.proportions)
+basepop_init <- as.numeric(burkina.faso.females$baseline.pop.counts)
+
+sx_init <- burkina.faso.females$survival.proportions
+sx_init <- cbind(sx_init, `2005` = sx_init[ , "2000"], `2010` = sx_init[ , "2000"])
+
+fx_init <- burkina.faso.females$fertility.rates[4:10, ]
+fx_init <- cbind(fx_init, `2005` = fx_init[ , "2000"], `2010` = fx_init[ , "2000"])
+
+gx_init <- burkina.faso.females$migration.proportions
+gx_init <- cbind(gx_init, `2005` = gx_init[ , "2000"], `2010` = gx_init[ , "2000"])
+
+log_basepop_mean <- as.vector(log(basepop_init))
+logit_sx_mean <- as.vector(qlogis(sx_init))
+log_fx_mean <- as.vector(log(fx_init))
+gx_mean <- as.vector(gx_init)
   
 data <- list(log_basepop_mean = log_basepop_mean,
              logit_sx_mean = logit_sx_mean,
              log_fx_mean = log_fx_mean,
              gx_mean = gx_mean,
-             srb = rep(1.05, ncol(burkina.faso.females$survival.proportions)),
+             srb = rep(1.05, ncol(sx_init)),
              age_span = 5,
-             n_steps = ncol(burkina.faso.females$survival.proportions),
+             n_steps = ncol(sx_init),
              fx_idx = 4L,
              fx_span = 7L,
              census_log_pop = log(burkina.faso.females$census.pop.counts),
@@ -213,6 +226,89 @@ fit[1:6]
 #> $message
 #> [1] "relative convergence (4)"
 ```
+
+Sample from posterior distribution and generate outputs
+
+``` r
+fit <- sample_tmb(fit)
+
+colnames(fit$sample$population) <- 1:ncol(fit$sample$population)
+
+init_pop_mat <- ccmppR(basepop_init, sx_init, fx_init, gx_init,
+                       srb = rep(1.05, ncol(sx_init)), age_span = 5, fx_idx = 4)
+
+df <- crossing(year = seq(1960, 2015, 5),
+               sex = "female",
+               age_group = c(sprintf("%02d-%02d", 0:15*5, 0:15*5+4), "80+")) %>%
+  mutate(init_pop = as.vector(init_pop_mat))
+
+census_pop <- crossing(sex = "female",
+                       age_group = c(sprintf("%02d-%02d", 0:15*5, 0:15*5+4), "80+")) %>%
+  bind_cols(as.tibble(burkina.faso.females$census.pop.counts)) %>%
+  gather(year, census_pop, `1975`:`2005`) %>%
+  type_convert(cols(year = col_double()))
+
+df <- df %>%
+  left_join(census_pop) %>%
+  bind_cols(as.tibble(fit$sample$population)) %>%
+  gather(sample, value, `1`:last_col()) %>%
+  group_by(year, sex, age_group)
+#> Joining, by = c("year", "sex", "age_group")
+
+agepop <- df %>%
+  group_by(year, sex, age_group) %>%
+  summarise(init_pop = mean(init_pop),
+            census_pop = mean(census_pop),
+            mean = mean(value),
+            lower = quantile(value, 0.025),
+            upper = quantile(value, 0.975))
+
+totalpop <- df %>%
+  group_by(year, sample) %>%
+  summarise(init_pop = sum(init_pop),
+            census_pop = sum(census_pop),
+            value = sum(value)) %>%
+  group_by(year) %>%
+  summarise(init_pop = mean(init_pop),
+            census_pop = mean(census_pop),
+            mean = mean(value),
+            lower = quantile(value, 0.025),
+            upper = quantile(value, 0.975))
+```
+
+``` r
+ggplot(totalpop, aes(year, mean, ymin = lower, ymax = upper)) +
+  geom_ribbon(alpha = 0.2) +
+  geom_line() +
+  geom_line(aes(y = init_pop), linetype = "dashed") +
+  geom_point(aes(y = census_pop), shape = 4, color = "darkred", stroke = 2) +
+  scale_y_continuous("Total population (millions)", labels = scales::number_format(scale = 1e-6)) +
+  expand_limits(y = 0) +
+  labs(x = NULL) +
+  theme_light() +
+  ggtitle("BFA females: total population")
+#> Warning: Removed 8 rows containing missing values (geom_point).
+```
+
+<img src="man/figures/README-unnamed-chunk-2-1.png" width="100%" style="display: block; margin: auto;" />
+
+``` r
+ggplot(agepop, aes(age_group, mean, ymin = lower, ymax = upper, group = 1)) +
+  geom_ribbon(alpha = 0.2) +
+  geom_line() +
+  geom_line(aes(y = init_pop), linetype = "dashed") +
+  geom_point(aes(y = census_pop), color = "darkred") +
+  facet_wrap(~year, scales = "free_y") + 
+  scale_y_continuous("Total population (thousands)", labels = scales::number_format(scale = 1e-3)) +
+  expand_limits(y = 0) +
+  theme_light() +
+  theme(axis.text.x = element_text(angle = 30, hjust = 1),
+        panel.grid = element_blank()) +
+  ggtitle("BFA females: population by age")
+#> Warning: Removed 136 rows containing missing values (geom_point).
+```
+
+<img src="man/figures/README-unnamed-chunk-3-1.png" width="100%" style="display: block; margin: auto;" />
 
 ## Development notes
 
