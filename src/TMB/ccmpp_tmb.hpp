@@ -29,10 +29,21 @@ Type ccmpp_tmb(objective_function<Type>* obj)
 
     
   Type nll(0.0);
+
+  // Hyper priors
   
-  PARAMETER(log_sigma_logpop);
-  Type sigma_logpop(exp(log_sigma_logpop));
-  nll -= log_sigma_logpop; // change of variable
+  PARAMETER(log_tau2_logpop);
+  nll -= dlgamma(log_tau2_logpop, Type(1.0), Type(1.0 / 0.0109), true);
+  Type sigma_logpop(exp(-0.5 * log_tau2_logpop));
+
+  PARAMETER(log_tau2_sx);
+  nll -= dlgamma(log_tau2_sx, Type(1.0), Type(1.0 / 0.0109), true);
+  Type sigma_sx(exp(-0.5 * log_tau2_sx));
+
+  PARAMETER(log_tau2_fx);
+  nll -= dlgamma(log_tau2_fx, Type(1.0), Type(1.0 / 0.0109), true);
+  Type sigma_fx(exp(-0.5 * log_tau2_fx));
+
 
   // prior for base population
   PARAMETER_VECTOR(log_basepop);
@@ -40,20 +51,12 @@ Type ccmpp_tmb(objective_function<Type>* obj)
   vector<Type> basepop(exp(log_basepop));
 
   // prior for logit(Sx)
-  PARAMETER(log_sigma_sx);
-  Type sigma_sx(exp(log_sigma_sx));
-  nll -= log_sigma_sx; // change of variable
-
   PARAMETER_VECTOR(logit_sx);
   nll -= dnorm(logit_sx, logit_sx_mean, sigma_sx, true).sum();
   vector<Type> sx(invlogit(logit_sx));
   Map<Matrix<Type, Dynamic, Dynamic>> sx_mat(sx.data(), basepop.size() + 1, n_steps);
 
   // prior for log(fx)
-  PARAMETER(log_sigma_fx);
-  Type sigma_fx(exp(log_sigma_fx));
-  nll -= log_sigma_fx; // change of variable
-
   PARAMETER_VECTOR(log_fx);
   nll -= dnorm(log_fx, log_fx_mean, sigma_fx, true).sum();
   vector<Type> fx(exp(log_fx));

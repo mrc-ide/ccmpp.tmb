@@ -85,11 +85,11 @@ data <- list(log_basepop_mean = log_basepop_mean,
              fx_span = 7L,
              census_log_pop = log(burkina.faso.females$census.pop.counts),
              census_year_idx = c(4L, 6L, 8L, 10L))
-par <- list(log_sigma_logpop = 0,
+par <- list(log_tau2_logpop = 0,
+            log_tau2_sx = 0,
+            log_tau2_fx = 0,            
             log_basepop = log_basepop_mean,
-            log_sigma_sx = 0,
             logit_sx = logit_sx_mean,
-            log_sigma_fx = 0,
             log_fx = log_fx_mean)
 
 obj <- MakeADFun(data = c(model = "ccmpp_tmb", data),
