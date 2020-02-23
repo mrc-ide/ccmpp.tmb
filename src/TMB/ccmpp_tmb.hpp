@@ -83,7 +83,8 @@ Type ccmpp_tmb(objective_function<Type>* obj)
   		 sigma_logpop, true).sum();
   }
 
-  REPORT(projpop);
+  vector<Type> population(Map<Matrix<Type, Dynamic, 1>>(projpop.data(), projpop.size(), 1));
+  REPORT(population);
 
   return Type(nll);
 }

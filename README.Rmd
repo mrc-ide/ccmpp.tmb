@@ -99,9 +99,8 @@ par <- list(log_tau2_logpop = 0,
 obj <- make_tmb_obj(data, par)
 
 obj$fn()
-obj$report()
 
-obj$report()$projpop[ , data$census_year_idx]
+matrix(obj$report()$population, nrow = 17)[ , data$census_year_idx]
 
 input <- list(data = data, par_init = par)
 fit <- fit_tmb(input)
