@@ -233,6 +233,7 @@ Sample from posterior distribution and generate outputs
 fit <- sample_tmb(fit)
 
 colnames(fit$sample$population) <- 1:ncol(fit$sample$population)
+colnames(fit$sample$fx) <- 1:ncol(fit$sample$fx)
 
 init_pop_mat <- ccmppR(basepop_init, sx_init, fx_init, gx_init,
                        srb = rep(1.05, ncol(sx_init)), age_span = 5, fx_idx = 4)
@@ -247,12 +248,13 @@ census_pop <- crossing(sex = "female",
   bind_cols(as.tibble(burkina.faso.females$census.pop.counts)) %>%
   gather(year, census_pop, `1975`:`2005`) %>%
   type_convert(cols(year = col_double()))
+#> Warning: `as.tibble()` is deprecated, use `as_tibble()` (but mind the new semantics).
+#> This warning is displayed once per session.
 
 df <- df %>%
   left_join(census_pop) %>%
   bind_cols(as.tibble(fit$sample$population)) %>%
-  gather(sample, value, `1`:last_col()) %>%
-  group_by(year, sex, age_group)
+  gather(sample, value, `1`:last_col())
 #> Joining, by = c("year", "sex", "age_group")
 
 agepop <- df %>%
@@ -309,6 +311,39 @@ ggplot(agepop, aes(age_group, mean, ymin = lower, ymax = upper, group = 1)) +
 ```
 
 <img src="man/figures/README-unnamed-chunk-3-1.png" width="80%" style="display: block; margin: auto;" />
+
+Posterior distribution for TFR:
+
+``` r
+
+asfr <- crossing(year = seq(1960, 2010, 5),
+                 age_group = sprintf("%02d-%02d", 3:9*5, 3:9*5+4)) %>%
+  mutate(init_asfr = as.vector(fx_init)) %>%
+  bind_cols(as.tibble(fit$sample$fx)) %>%
+  gather(sample, value, `1`:last_col()) 
+
+tfr <- asfr %>%
+  group_by(year, sample) %>%
+  summarise(init_tfr = 5 * sum(init_asfr),
+            value = 5 * sum(value)) %>%
+  group_by(year) %>%
+  summarise(init_tfr = mean(init_tfr),
+         mean = mean(value),
+         lower = quantile(value, 0.025),
+         upper = quantile(value, 0.975))
+
+ggplot(tfr, aes(year, mean, ymin = lower, ymax = upper)) +
+  geom_ribbon(alpha = 0.2) +
+  geom_line() +
+  geom_line(aes(y = init_tfr), linetype = "dashed") +
+  scale_y_continuous("Total fertility rate", limits = c(5, 9)) +
+  labs(x = NULL) +
+  theme_light() +
+  theme(panel.grid = element_blank()) +
+  ggtitle("BFA: total fertility rate")
+```
+
+<img src="man/figures/README-asfr-1.png" width="60%" style="display: block; margin: auto;" />
 
 ## Development notes
 

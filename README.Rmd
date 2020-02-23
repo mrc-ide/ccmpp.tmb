@@ -130,6 +130,7 @@ Sample from posterior distribution and generate outputs
 fit <- sample_tmb(fit)
 
 colnames(fit$sample$population) <- 1:ncol(fit$sample$population)
+colnames(fit$sample$fx) <- 1:ncol(fit$sample$fx)
 
 init_pop_mat <- ccmppR(basepop_init, sx_init, fx_init, gx_init,
                        srb = rep(1.05, ncol(sx_init)), age_span = 5, fx_idx = 4)
@@ -148,8 +149,7 @@ census_pop <- crossing(sex = "female",
 df <- df %>%
   left_join(census_pop) %>%
   bind_cols(as.tibble(fit$sample$population)) %>%
-  gather(sample, value, `1`:last_col()) %>%
-  group_by(year, sex, age_group)
+  gather(sample, value, `1`:last_col())
 
 agepop <- df %>%
   group_by(year, sex, age_group) %>%
@@ -198,6 +198,38 @@ ggplot(agepop, aes(age_group, mean, ymin = lower, ymax = upper, group = 1)) +
   theme(axis.text.x = element_text(angle = 30, hjust = 1),
         panel.grid = element_blank()) +
   ggtitle("BFA females: population by age")
+```
+
+Posterior distribution for TFR:
+
+```{r asfr, fig.height = 4, fig.width = 5, fig.align = "center", out.width = "60%"}
+
+asfr <- crossing(year = seq(1960, 2010, 5),
+                 age_group = sprintf("%02d-%02d", 3:9*5, 3:9*5+4)) %>%
+  mutate(init_asfr = as.vector(fx_init)) %>%
+  bind_cols(as.tibble(fit$sample$fx)) %>%
+  gather(sample, value, `1`:last_col()) 
+
+tfr <- asfr %>%
+  group_by(year, sample) %>%
+  summarise(init_tfr = 5 * sum(init_asfr),
+            value = 5 * sum(value)) %>%
+  group_by(year) %>%
+  summarise(init_tfr = mean(init_tfr),
+         mean = mean(value),
+         lower = quantile(value, 0.025),
+         upper = quantile(value, 0.975))
+
+ggplot(tfr, aes(year, mean, ymin = lower, ymax = upper)) +
+  geom_ribbon(alpha = 0.2) +
+  geom_line() +
+  geom_line(aes(y = init_tfr), linetype = "dashed") +
+  scale_y_continuous("Total fertility rate", limits = c(5, 9)) +
+  labs(x = NULL) +
+  theme_light() +
+  theme(panel.grid = element_blank()) +
+  ggtitle("BFA: total fertility rate")
+
 ```
 
 

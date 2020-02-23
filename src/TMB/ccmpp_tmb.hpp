@@ -85,6 +85,9 @@ Type ccmpp_tmb(objective_function<Type>* obj)
 
   vector<Type> population(Map<Matrix<Type, Dynamic, 1>>(projpop.data(), projpop.size(), 1));
   REPORT(population);
+  REPORT(sx);
+  REPORT(fx);
+  REPORT(gx);
 
   return Type(nll);
 }
