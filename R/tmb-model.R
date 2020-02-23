@@ -88,3 +88,96 @@ fit_tmb <- function(tmb_input,
   val
 }
 
+## #' Calculate Posterior Mean and Uncertainty Via TMB `sdreport()`
+## #'
+## #' @param naomi_fit Fitted TMB model.
+## #'
+## #' @export
+## report_tmb <- function(naomi_fit) {
+
+##   stopifnot(methods::is(fit, "naomi_fit"))
+##   naomi_fit$sdreport <- TMB::sdreport(naomi_fit$obj, naomi_fit$par,
+##                                       getReportCovariance = FALSE,
+##                                       bias.correct = TRUE)
+##   naomi_fit
+## }
+
+
+
+#' Sample TMB fit
+#'
+#' @param fit The TMB fit from [fit_tmb()].
+#' @param nsample Number of samples to draw.
+#' @param rng_seed Seed passed to [set.seed()].
+#' @param random_only Logigcal whether to sample only random effects conditional
+#'                    on optimized fixed effect values.
+#' @param verbose If TRUE prints additional information.
+#'
+#' @return Fit object with additional list element `sample`.
+#' 
+#' @export
+sample_tmb <- function(fit, nsample = 1000, rng_seed = NULL,
+                       random_only = TRUE, verbose = FALSE) {
+
+  if (!is.null(rng_seed)) {
+    set.seed(rng_seed)
+  }
+  
+  stopifnot(methods::is(fit, "leapfrog_fit"))
+  stopifnot(nsample > 1)
+
+  if (!random_only) {
+
+    if (verbose) message("Calculating joint precision")
+    hess <- sdreport_joint_precision(fit$obj, fit$par.fixed)
+
+    if (verbose) message("Inverting precision for joint covariance")
+    cov <- solve(hess)
+
+    if (verbose) message("Drawing sample")
+    smp <- rmvnorm_sparseprec(nsample, fit$par.full, cov)
+
+  } else {
+
+    r <- fit$obj$env$random
+    par_f <- fit$par.full[-r]
+
+    par_r <- fit$par.full[r]
+    hess_r <- fit$obj$env$spHess(fit$par.full, random = TRUE)
+    smp_r <- rmvnorm_sparseprec(nsample, par_r, hess_r)
+
+    smp <- matrix(0, nsample, length(fit$par.full))
+    smp[ , r] <- smp_r
+    smp[ ,-r] <- matrix(par_f, nsample, length(par_f), byrow = TRUE)
+    colnames(smp)[r] <- colnames(smp_r)
+    colnames(smp)[-r] <- names(par_f)
+  }
+
+  if (verbose) message("Simulating outputs")
+  sim <- apply(smp, 1, fit$obj$report)
+
+  r <- fit$obj$report()
+
+  if (verbose) message("Returning sample")
+  fit$sample <- Map(vapply, list(sim), "[[", lapply(lengths(r), numeric), names(r))
+  is_vector <- vapply(fit$sample, class, character(1)) == "numeric"
+  fit$sample[is_vector] <- lapply(fit$sample[is_vector], as.matrix, nrow = 1)
+  names(fit$sample) <- names(r)
+
+  fit
+}
+
+#' Random sample from multivariate normal distribution with sparse precision matrix
+#'
+#' This function is similar to [mvtnorm::rmvnorm()] except that instead of
+#' argument covariance matrix `sigma`, it takes a precision matrix `prec`
+#' inheriting a symmetric sparse matrix class from the Matrix package.
+#' 
+#' @noRd
+rmvnorm_sparseprec <- function(n, mean = rep(0, nrow(prec)), prec = diag(lenth(mean))) {
+
+  z = matrix(rnorm(n * length(mean)), ncol = n)
+  L_inv = Matrix::Cholesky(prec)
+  v <- mean + Matrix::solve(as(L_inv, "pMatrix"), Matrix::solve(Matrix::t(as(L_inv, "Matrix")), z))
+  as.matrix(Matrix::t(v))
+}

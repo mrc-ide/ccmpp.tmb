@@ -49,3 +49,30 @@ test_that("fit_tmb() options control message and warnings", {
                  "convergence error: iteration limit reached without convergence \\(10\\)")
   expect_equal(fit_3iter$iterations, 3)
 })
+
+test_that("sample_tmb() return values, options, and message", {
+
+  input <- list(data = bff_data, par_init = bff_par)
+  fit <- fit_tmb(input, outer_verbose = FALSE)
+
+  a_nsample <- 5
+  a_seed <- 28
+  expect_silent(sample1 <- sample_tmb(fit, nsample = a_nsample, rng_seed = a_seed))
+  expect_equal(ncol(sample1$sample$population), a_nsample)
+
+  sample2 <- sample_tmb(fit, nsample = a_nsample, rng_seed = a_seed)
+  expect_equal(sample2$sample, sample1$sample)
+  
+  ## The logic of this test is that if sample_tmb(..., rng_seed = NULL), then
+  ## sample_tmb() should not change the instance RNG, so set.seed() before calling
+  ## should persist.
+  set.seed(a_seed)
+  sample3 <- sample_tmb(fit, nsample = a_nsample)
+  expect_equal(sample3$sample, sample1$sample)
+
+  sample4 <- sample_tmb(fit, nsample = a_nsample)
+  expect_false(sample4$sample$population[1] == sample1$sample$population[1])
+  
+  expect_message(sample_tmb(fit, nsample = a_nsample, verbose = TRUE),
+                 "Simulating outputs")
+})
