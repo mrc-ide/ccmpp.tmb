@@ -172,7 +172,7 @@ totalpop <- df %>%
             upper = quantile(value, 0.975))
 ```
 
-```{r, fig.height = 3, fig.width = 4, fig.align = "center"}
+```{r, fig.height = 4, fig.width = 5, fig.align = "center", out.width = "60%"}
 ggplot(totalpop, aes(year, mean, ymin = lower, ymax = upper)) +
   geom_ribbon(alpha = 0.2) +
   geom_line() +
@@ -185,7 +185,7 @@ ggplot(totalpop, aes(year, mean, ymin = lower, ymax = upper)) +
   ggtitle("BFA females: total population")
 ```
 
-```{r, fig.height = 5, fig.width = 7, fig.align = "center"}
+```{r, fig.height = 5, fig.width = 7, fig.align = "center", out.width = "80%"}
 ggplot(agepop, aes(age_group, mean, ymin = lower, ymax = upper, group = 1)) +
   geom_ribbon(alpha = 0.2) +
   geom_line() +

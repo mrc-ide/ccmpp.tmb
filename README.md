@@ -290,7 +290,7 @@ ggplot(totalpop, aes(year, mean, ymin = lower, ymax = upper)) +
 #> Warning: Removed 8 rows containing missing values (geom_point).
 ```
 
-<img src="man/figures/README-unnamed-chunk-2-1.png" width="100%" style="display: block; margin: auto;" />
+<img src="man/figures/README-unnamed-chunk-2-1.png" width="60%" style="display: block; margin: auto;" />
 
 ``` r
 ggplot(agepop, aes(age_group, mean, ymin = lower, ymax = upper, group = 1)) +
@@ -308,7 +308,7 @@ ggplot(agepop, aes(age_group, mean, ymin = lower, ymax = upper, group = 1)) +
 #> Warning: Removed 136 rows containing missing values (geom_point).
 ```
 
-<img src="man/figures/README-unnamed-chunk-3-1.png" width="100%" style="display: block; margin: auto;" />
+<img src="man/figures/README-unnamed-chunk-3-1.png" width="80%" style="display: block; margin: auto;" />
 
 ## Development notes
 
