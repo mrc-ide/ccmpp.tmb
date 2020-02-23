@@ -27,3 +27,25 @@ test_that("make_tmb_obj(..., inner_verbose = FALSE) option", {
   expect_silent(obj$fn())
   expect_output(obj_verbose$fn(), "iter.*mgc:.*")
 })
+
+test_that("fit_tmb() options control message and warnings", {
+
+  input <- list(data = bff_data, par_init = bff_par)
+
+  expect_message(fit <- fit_tmb(input),
+                 "converged: relative convergence \\(4\\)")
+  expect_equal(fit$convergence, 0)
+  expect_equal(fit$message, "relative convergence (4)")
+  
+  expect_silent(fit_tmb(input, outer_verbose = FALSE))
+  expect_output(
+    suppressWarnings(
+      suppressMessages(
+        fit_tmb(input, inner_verbose = TRUE, max_iter = 1)
+      )),
+    "iter.*mgc:.")
+
+  expect_warning(fit_3iter <- fit_tmb(input, max_iter = 3),
+                 "convergence error: iteration limit reached without convergence \\(10\\)")
+  expect_equal(fit_3iter$iterations, 3)
+})
