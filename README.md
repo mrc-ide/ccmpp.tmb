@@ -194,7 +194,8 @@ obj$report()$projpop[ , data$census_year_idx]
 #> [16,]  11286.657  15250.511  20411.382   26561.60
 #> [17,]   4538.638   5972.196   9158.649   12697.11
 
-fit <- nlminb(obj$par, obj$fn, obj$gr, control = list(trace = 1))
+input <- list(data = data, par_init = par)
+fit <- fit_tmb(input)
 #>   0:     110.83349:  0.00000  0.00000  0.00000  0.00000
 #>   1:     24.892728:  3.47909 0.328263 0.303597  1.92250
 #>   2:    -39.081896:  5.44273  1.52064  1.06743  5.10666
@@ -209,8 +210,9 @@ fit <- nlminb(obj$par, obj$fn, obj$gr, control = list(trace = 1))
 #>  11:    -68.738076:  6.69265  4.51519  4.94882  5.05129
 #>  12:    -68.738077:  6.69239  4.51545  4.94908  5.05136
 #>  13:    -68.738077:  6.69241  4.51543  4.94903  5.05137
+#> converged: relative convergence (4)
 
-fit              
+fit[1:6]
 #> $par
 #> log_tau2_logpop     log_tau2_sx     log_tau2_fx     log_tau2_gx 
 #>        6.692407        4.515433        4.949035        5.051373 

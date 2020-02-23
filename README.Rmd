@@ -103,9 +103,10 @@ obj$report()
 
 obj$report()$projpop[ , data$census_year_idx]
 
-fit <- nlminb(obj$par, obj$fn, obj$gr, control = list(trace = 1))
+input <- list(data = data, par_init = par)
+fit <- fit_tmb(input)
 
-fit              
+fit[1:6]
 
 ```
 

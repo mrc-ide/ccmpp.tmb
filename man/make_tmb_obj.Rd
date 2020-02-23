@@ -4,7 +4,13 @@
 \alias{make_tmb_obj}
 \title{Make TMB objective function object}
 \usage{
-make_tmb_obj(data, par, model = "ccmpp_tmb", inner_verbose = FALSE)
+make_tmb_obj(
+  data,
+  par,
+  model = "ccmpp_tmb",
+  inner_verbose = FALSE,
+  calc_outputs = TRUE
+)
 }
 \arguments{
 \item{data}{List of TMB data inputs.}
@@ -15,6 +21,9 @@ make_tmb_obj(data, par, model = "ccmpp_tmb", inner_verbose = FALSE)
 
 \item{inner_verbose}{Logical flag whether to print TMB inner optimization
 tracing information.}
+
+\item{calc_outputs}{Logical flag to be passed to model object whether to
+calculate outputs not required for objective function.}
 }
 \value{
 TMB objective function object with class `tmb_obj`.
