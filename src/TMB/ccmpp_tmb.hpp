@@ -17,6 +17,7 @@ Type ccmpp_tmb(objective_function<Type>* obj)
   DATA_VECTOR(log_basepop_mean);
   DATA_VECTOR(logit_sx_mean);
   DATA_VECTOR(log_fx_mean);
+  DATA_VECTOR(gx_mean);
   DATA_VECTOR(srb);
   DATA_SCALAR(age_span);
   DATA_INTEGER(n_steps);
@@ -44,6 +45,10 @@ Type ccmpp_tmb(objective_function<Type>* obj)
   nll -= dlgamma(log_tau2_fx, Type(1.0), Type(1.0 / 0.0109), true);
   Type sigma_fx(exp(-0.5 * log_tau2_fx));
 
+  PARAMETER(log_tau2_gx);
+  nll -= dlgamma(log_tau2_gx, Type(1.0), Type(1.0 / 0.0436), true);
+  Type sigma_gx(exp(-0.5 * log_tau2_gx));
+
 
   // prior for base population
   PARAMETER_VECTOR(log_basepop);
@@ -62,8 +67,14 @@ Type ccmpp_tmb(objective_function<Type>* obj)
   vector<Type> fx(exp(log_fx));
   Map<Matrix<Type, Dynamic, Dynamic>> fx_mat(fx.data(), fx_span, n_steps);
 
+  // prior for gx
+  PARAMETER_VECTOR(gx);
+  nll -= dnorm(gx, gx_mean, sigma_gx, true).sum();
+  Map<Matrix<Type, Dynamic, Dynamic>> gx_mat(gx.data(), basepop.size(), n_steps);
+
   // population projection
-  matrix<Type> projpop(ccmpp<Type>(basepop, sx_mat, fx_mat, srb, age_span, fx_idx-1));
+  matrix<Type> projpop(ccmpp<Type>(basepop, sx_mat, fx_mat, gx_mat,
+				   srb, age_span, fx_idx-1));
 
   // likelihood for log census counts
   for(int i = 0; i < census_year_idx.size(); i++) {

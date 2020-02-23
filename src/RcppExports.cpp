@@ -22,25 +22,26 @@ BEGIN_RCPP
 END_RCPP
 }
 // ccmppR
-Eigen::MatrixXd ccmppR(const Eigen::Map<Eigen::VectorXd> basepop, const Eigen::Map<Eigen::MatrixXd> sx, const Eigen::Map<Eigen::MatrixXd> fx, const Eigen::Map<Eigen::VectorXd> srb, double age_span, int fx_idx);
-RcppExport SEXP _leapfrog_ccmppR(SEXP basepopSEXP, SEXP sxSEXP, SEXP fxSEXP, SEXP srbSEXP, SEXP age_spanSEXP, SEXP fx_idxSEXP) {
+Eigen::MatrixXd ccmppR(const Eigen::Map<Eigen::VectorXd> basepop, const Eigen::Map<Eigen::MatrixXd> sx, const Eigen::Map<Eigen::MatrixXd> fx, const Eigen::Map<Eigen::MatrixXd> gx, const Eigen::Map<Eigen::VectorXd> srb, double age_span, int fx_idx);
+RcppExport SEXP _leapfrog_ccmppR(SEXP basepopSEXP, SEXP sxSEXP, SEXP fxSEXP, SEXP gxSEXP, SEXP srbSEXP, SEXP age_spanSEXP, SEXP fx_idxSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const Eigen::Map<Eigen::VectorXd> >::type basepop(basepopSEXP);
     Rcpp::traits::input_parameter< const Eigen::Map<Eigen::MatrixXd> >::type sx(sxSEXP);
     Rcpp::traits::input_parameter< const Eigen::Map<Eigen::MatrixXd> >::type fx(fxSEXP);
+    Rcpp::traits::input_parameter< const Eigen::Map<Eigen::MatrixXd> >::type gx(gxSEXP);
     Rcpp::traits::input_parameter< const Eigen::Map<Eigen::VectorXd> >::type srb(srbSEXP);
     Rcpp::traits::input_parameter< double >::type age_span(age_spanSEXP);
     Rcpp::traits::input_parameter< int >::type fx_idx(fx_idxSEXP);
-    rcpp_result_gen = Rcpp::wrap(ccmppR(basepop, sx, fx, srb, age_span, fx_idx));
+    rcpp_result_gen = Rcpp::wrap(ccmppR(basepop, sx, fx, gx, srb, age_span, fx_idx));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
     {"_leapfrog_make_leslie_matrixR", (DL_FUNC) &_leapfrog_make_leslie_matrixR, 5},
-    {"_leapfrog_ccmppR", (DL_FUNC) &_leapfrog_ccmppR, 6},
+    {"_leapfrog_ccmppR", (DL_FUNC) &_leapfrog_ccmppR, 7},
     {NULL, NULL, 0}
 };
 

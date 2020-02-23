@@ -46,15 +46,19 @@ make_leslie_matrixR(const Eigen::Map<Eigen::ArrayXd> sx,
 //' Simulate cohort component population projection
 //'
 //' @param basepop vector of baseline population size.
-//' @param sx a matrix of survivorship probabilities with column for each
-//'           projection step.
-//' @param fx a matrix of fertility rates, only amongst fertile ages, with
-//'           column for each projection step.
+//' @param sx a matrix of survivorship probabilities.
+//' @param fx a matrix of fertility rates, only amongst fertile ages.
+//' @param gx a matrix of proportion of migrants during projection period.
 //' @param srb a vector of sex ratio at birth.
 //' @param age_span the interval for age and projection time step.
 //' @param fx_idx first in
 //'
 //' @return A matrix of projected population at each step
+//'
+//' @details
+//' Arguments `sx`, `fx`, and `gx` are matrices with one column for each
+//' projection period, and `srb` is a vector of length number of projection 
+//' periods.
 //'
 //' @examples
 //'
@@ -63,6 +67,7 @@ make_leslie_matrixR(const Eigen::Map<Eigen::ArrayXd> sx,
 //' ccmppR(basepop = as.numeric(burkina.faso.females$baseline.pop.counts),
 //'        sx = burkina.faso.females$survival.proportions,
 //'        fx = burkina.faso.females$fertility.rates[4:10, 1],
+//'        gx = burkina.faso.females$migration.proportions,
 //'        srb = rep(1.05, ncol(burkina.faso.females$survival.proportions)),
 //'        age_span = 5,
 //'        fx_idx = 4)
@@ -72,9 +77,10 @@ Eigen::MatrixXd
 ccmppR(const Eigen::Map<Eigen::VectorXd> basepop,
        const Eigen::Map<Eigen::MatrixXd> sx,
        const Eigen::Map<Eigen::MatrixXd> fx,
+       const Eigen::Map<Eigen::MatrixXd> gx,
        const Eigen::Map<Eigen::VectorXd> srb,
        double age_span,
        int fx_idx) {
   
-  return ccmpp<double>(basepop, sx, fx, srb, age_span, fx_idx - 1);
+  return ccmpp<double>(basepop, sx, fx, gx, srb, age_span, fx_idx - 1);
 }

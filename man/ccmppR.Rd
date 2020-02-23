@@ -4,16 +4,16 @@
 \alias{ccmppR}
 \title{Simulate cohort component population projection}
 \usage{
-ccmppR(basepop, sx, fx, srb, age_span, fx_idx)
+ccmppR(basepop, sx, fx, gx, srb, age_span, fx_idx)
 }
 \arguments{
 \item{basepop}{vector of baseline population size.}
 
-\item{sx}{a matrix of survivorship probabilities with column for each
-projection step.}
+\item{sx}{a matrix of survivorship probabilities.}
 
-\item{fx}{a matrix of fertility rates, only amongst fertile ages, with
-column for each projection step.}
+\item{fx}{a matrix of fertility rates, only amongst fertile ages.}
+
+\item{gx}{a matrix of proportion of migrants during projection period.}
 
 \item{srb}{a vector of sex ratio at birth.}
 
@@ -27,6 +27,11 @@ A matrix of projected population at each step
 \description{
 Simulate cohort component population projection
 }
+\details{
+Arguments `sx`, `fx`, and `gx` are matrices with one column for each
+projection period, and `srb` is a vector of length number of projection 
+periods.
+}
 \examples{
 
 library(popReconstruct)
@@ -34,6 +39,7 @@ data(burkina_faso_females)
 ccmppR(basepop = as.numeric(burkina.faso.females$baseline.pop.counts),
        sx = burkina.faso.females$survival.proportions,
        fx = burkina.faso.females$fertility.rates[4:10, 1],
+       gx = burkina.faso.females$migration.proportions,
        srb = rep(1.05, ncol(burkina.faso.females$survival.proportions)),
        age_span = 5,
        fx_idx = 4)
