@@ -16,11 +16,13 @@ LinkingTo:
     Rcpp,
     RcppEigen,
     TMB
-Imports: 
+Imports:
+    methods
     Matrix,
     Rcpp,
     TMB (>= 1.7.16)
-Suggests: 
+Suggests:
+    covr,
     popReconstruct,
-    testthat (>= 2.1.0),
-    covr
+    testthat (>= 2.1.0)
+
