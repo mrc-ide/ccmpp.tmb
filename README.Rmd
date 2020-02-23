@@ -112,7 +112,35 @@ fit
 
 ## Development notes
 
-* TMB model code and testing are implemented following templates from the [`TMBtools`](https://github.com/mlysy/TMBtools) package with guidance for package development with both TMB models and Rcpp code. 
+The simulation model is implemented as templated C++ code in `src/ccmpp.h` 
+such that the simulation model may be developed as a standalone C++ library
+that can be called by other software without requiring R-specific code features.
+
+* Presently the CCMPP model is implemented as a sparse Leslie matrix formulation. 
+  In future, this will probably be split into multiple steps to save intermediate
+  computations of demographic events (births, deaths, migrations).
+* In future a class structure will probably be developed.
+* Specifying static dimensions for the state space may improve efficiency. This 
+  should be possible for common options (5x5 year, 1x1 year) through templating.
+  
+The file `src/ccmppR.cpp` contains R wrapper functions for the model simulation 
+via [Rcpp](http://dirk.eddelbuettel.com/code/rcpp.html) and 
+[RcppEigen](http://dirk.eddelbuettel.com/code/rcpp.eigen.html).
+  
+The objective function (the negative log posterior) is implemented in templated 
+C++ code using probability functions from the Template Model Builder 
+([TMB](https://github.com/kaskr/adcomp/wiki)) R package. Implementation in TMB
+provides gradient functions via automatic differentiation (AD).
+
+* Further investigation is needed about the portability of AD objective function
+  DLLs outside of the R environment.
+
+TMB also contains R functions for approximation integration of arbitrary random
+effects via Laplace approximation.
+
+TMB model code and testing are implemented following templates from the 
+[`TMBtools`](https://github.com/mlysy/TMBtools) package with guidance for package 
+development with both TMB models and Rcpp code. 
   * To add a new TMB model, save the model template in the `src/TMB` with extension `.pp`. The model name must match the file name. The signature is slightly different -- see other `.hpp` files for example.
   * Call `TMBtools::export_models()` to export the new TMB model to the meta-model list.
   * When constructing the objective function with `TMB::MakeADFun`, use `DLL= "leapfrog_TMBExports"` and add an additional value `model = "<model_name>"` to the `data` list.
