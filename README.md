@@ -39,7 +39,6 @@ Construct a sparse Leslie matrix:
 library(tidyverse)
 library(leapfrog)
 library(popReconstruct)
-#> Loading required package: coda
 
 data(burkina_faso_females)
 
@@ -87,8 +86,7 @@ make_leslie_matrixR(sx = burkina.faso.females$survival.proportions[,1],
 #> [17,] .         0.3181678 0.2099861
 ```
 
-Simulate a cohort component population
-projection:
+Simulate a cohort component population projection:
 
 ``` r
 pop_proj <- ccmppR(basepop = as.numeric(burkina.faso.females$baseline.pop.counts),
@@ -98,7 +96,7 @@ pop_proj <- ccmppR(basepop = as.numeric(burkina.faso.females$baseline.pop.counts
                    srb = rep(1.05, ncol(burkina.faso.females$survival.proportions)),
                    age_span = 5,
                    fx_idx = 4)
-pop_proj[ , c(1, 2, ncol(pop_proj))]
+pop_proj$population[ , c(1, 2, 10)]
 #>         [,1]       [,2]       [,3]
 #>  [1,] 386000 496963.688 1369041.17
 #>  [2,] 292000 338995.727 1088715.23
@@ -164,30 +162,32 @@ par <- list(log_tau2_logpop = 0,
 
 obj <- make_tmb_obj(data, par)
 
+init_sim <- obj$report()
+matrix(init_sim$population, nrow = 17)[ , data$census_year_idx]
+#>             [,1]       [,2]        [,3]       [,4]
+#>  [1,] 605122.263 795208.536 1033996.879 1369041.17
+#>  [2,] 500213.483 632644.932  848330.217 1088715.23
+#>  [3,] 434412.243 542556.373  724519.032  952860.73
+#>  [4,] 316003.052 470378.768  599148.299  846073.20
+#>  [5,] 247736.574 387113.613  483615.125  719894.38
+#>  [6,] 203773.553 267704.942  402180.255  572001.86
+#>  [7,] 181898.908 207461.542  331145.222  458905.67
+#>  [8,] 151475.723 168764.539  226610.907  379925.83
+#>  [9,] 125079.907 148891.568  173019.647  309642.33
+#> [10,] 105028.794 120751.178  137082.748  208006.24
+#> [11,]  86990.038  95552.187  117356.990  154298.67
+#> [12,]  70264.782  77258.457   92546.531  114066.08
+#> [13,]  53708.538  61306.324   71116.143   90879.78
+#> [14,]  36336.814  43957.286   52091.893   65876.04
+#> [15,]  20722.535  26639.236   33648.268   41985.79
+#> [16,]   8842.486  12213.805   16905.919   22044.43
+#> [17,]   3494.269   4906.748    7694.051   11332.85
+
 obj$fn()
 #> [1] 110.8335
 #> attr(,"logarithm")
 #> [1] TRUE
 
-matrix(obj$report()$population, nrow = 17)[ , data$census_year_idx]
-#>             [,1]       [,2]       [,3]       [,4]
-#>  [1,] 586299.168 753003.656 962489.176 1252978.16
-#>  [2,] 459242.300 598045.584 775198.946 1008185.99
-#>  [3,] 394553.653 503462.586 657974.445  869072.03
-#>  [4,] 315992.069 422558.078 557023.454  753945.02
-#>  [5,] 250625.530 346908.252 454997.405  641580.04
-#>  [6,] 210429.292 272236.861 371919.407  528990.03
-#>  [7,] 189557.388 215524.244 304938.785  434418.70
-#>  [8,] 159122.133 181456.243 240261.828  354780.52
-#>  [9,] 135284.233 163936.098 188471.502  287730.98
-#> [10,] 118315.492 134372.105 156718.080  223084.83
-#> [11,]  99280.765 109659.465 137829.574  170540.89
-#> [12,]  81464.594  91618.592 108025.671  133830.94
-#> [13,]  61818.277  72442.566  84186.123  109726.37
-#> [14,]  42765.853  52675.517  62806.965   77759.38
-#> [15,]  24274.364  32049.045  39847.691   50071.95
-#> [16,]  11286.657  15250.511  20411.382   26561.60
-#> [17,]   4538.638   5972.196   9158.649   12697.11
 
 input <- list(data = data, par_init = par)
 fit <- fit_tmb(input)
@@ -234,7 +234,10 @@ Sample from posterior distribution and generate outputs
 ``` r
 fit <- sample_tmb(fit)
 
+
+
 colnames(fit$sample$population) <- 1:ncol(fit$sample$population)
+colnames(fit$sample$migrations) <- 1:ncol(fit$sample$migrations)
 colnames(fit$sample$fx) <- 1:ncol(fit$sample$fx)
 
 init_pop_mat <- ccmpp_leslieR(basepop_init, sx_init, fx_init, gx_init,
@@ -345,37 +348,94 @@ ggplot(tfr, aes(year, mean, ymin = lower, ymax = upper)) +
 
 <img src="man/figures/README-asfr-1.png" width="60%" style="display: block; margin: auto;" />
 
-## Development notes
+``` r
+
+migrations <- crossing(year = seq(1960, 2010, 5),
+                       age_lower = 0:16*5) %>%
+  mutate(init_migrations = init_sim$migrations) %>%
+  bind_cols(as_tibble(fit$sample$migrations)) %>%
+  gather(sample, value, `1`:last_col()) 
+
+total_migrations <- migrations %>%
+  group_by(year, sample) %>%
+  summarise(init_migrations = 5 * sum(init_migrations),
+            value = 5 * sum(value)) %>%
+  group_by(year) %>%
+  summarise(init_migrations = mean(init_migrations),
+         mean = mean(value),
+         lower = quantile(value, 0.025),
+         upper = quantile(value, 0.975))
+
+ggplot(total_migrations, aes(year, mean, ymin = lower, ymax = upper)) +
+  geom_ribbon(alpha = 0.2) +
+  geom_line() +
+  geom_line(aes(y = init_migrations), linetype = "dashed") +
+  scale_y_continuous("Net migration (1000s)",
+                     labels = scales::number_format(scale=1e-3)) +
+  labs(x = NULL) +
+  theme_light() +
+  theme(panel.grid = element_blank()) +
+  ggtitle("BFA: total net migrations (1000s)")
+```
+
+<img src="man/figures/README-migrations-1.png" width="60%" style="display: block; margin: auto;" />
+
+## Code design
+
+### Simulation model
 
 The simulation model is implemented as templated C++ code in
-`src/ccmpp.h` such that the simulation model may be developed as a
+`src/ccmpp.h`. This is the simulation model may be developed as a
 standalone C++ library that can be called by other software without
-requiring R-specific code features.
+requiring R-specific code features. The code uses header-only open
+source libraries to maximize portability.
 
-  - Presently the CCMPP model is implemented as a sparse Leslie matrix
-    formulation. In future, this will probably be split into multiple
-    steps to save intermediate computations of demographic events
-    (births, deaths, migrations).
-  - In future a class structure will probably be developed.
-  - Specifying static dimensions for the state space may improve
-    efficiency. This should be possible for common options (5x5 year,
-    1x1 year) through templating.
+### Statistical inference
+
+The objective function (the negative log posterior density) is
+implemented in templated C++ code in the script `src/TMB/ccmpp_tmb.hpp`
+using probability functions from the Template Model Builder
+([TMB](https://github.com/kaskr/adcomp/wiki)) R package. The TMB package
+provides estimates of the gradient of the objective function via
+automatic differentiation and Laplace approximation to integrate random
+effects.
+
+The posterior density can also be sampled from using Hamiltonian Monte
+Carlo in Stan using the
+[*tmbstan*](https://cran.r-project.org/web/packages/tmbstan/index.html)
+package.
+
+Latent Gaussian models for model components (fertiliy rates, mortality
+rates, migration rates) are implemented using linear algebra tools from
+the *Eigen* package. Predicted values are coerced into arrays for the
+CCMPP model inputs.
+
+### R functions
 
 The file `src/ccmppR.cpp` contains R wrapper functions for the model
 simulation via [Rcpp](http://dirk.eddelbuettel.com/code/rcpp.html) and
 [RcppEigen](http://dirk.eddelbuettel.com/code/rcpp.eigen.html).
 
-The objective function (the negative log posterior) is implemented in
-templated C++ code using probability functions from the Template Model
-Builder ([TMB](https://github.com/kaskr/adcomp/wiki)) R package.
-Implementation in TMB provides gradient functions via automatic
-differentiation (AD).
+## Development notes
+
+### Simulation model
+
+  - The CCMPP model is implemented as a sparse Leslie matrix formulation
+    and using direct calculation of the projection in arrays so that
+    interim outputs (deaths, births, migrations) are also saved. The
+    array-based implementation appears to be faster.
+  - Class structure for popualtion projection model needs review.
+  - Specifying static dimensions for the state space may improve
+    efficiency. This should be possible for common options (5x5 year,
+    1x1 year) through templating.
+  - The model was implemented using *Eigen* containers following the
+    initial sparse Leslie matrix specification. However,
+    multi-dimensional arrays in the *boost* library may be preferable.
+
+### TMB
 
   - Further investigation is needed about the portability of AD
     objective function DLLs outside of the R environment.
-
-TMB also contains R functions for approximation integration of arbitrary
-random effects via Laplace approximation.
 
 TMB model code and testing are implemented following templates from the
 [`TMBtools`](https://github.com/mlysy/TMBtools) package with guidance

@@ -13,6 +13,10 @@ Type ccmpp_tmb(objective_function<Type>* obj)
   using Eigen::Matrix;
   using Eigen::Map;
   using Eigen::Dynamic;
+
+  typedef Map<Matrix<Type, Dynamic, 1>> MapVectorXt;
+  typedef Map<Matrix<Type, Dynamic, Dynamic>> MapMatrixXXt;
+
   
   DATA_VECTOR(log_basepop_mean);
   DATA_VECTOR(logit_sx_mean);
@@ -59,32 +63,45 @@ Type ccmpp_tmb(objective_function<Type>* obj)
   PARAMETER_VECTOR(logit_sx);
   nll -= dnorm(logit_sx, logit_sx_mean, sigma_sx, true).sum();
   vector<Type> sx(invlogit(logit_sx));
-  Map<Matrix<Type, Dynamic, Dynamic>> sx_mat(sx.data(), basepop.size() + 1, n_steps);
+  MapMatrixXXt sx_mat(sx.data(), basepop.size() + 1, n_steps);
 
   // prior for log(fx)
   PARAMETER_VECTOR(log_fx);
   nll -= dnorm(log_fx, log_fx_mean, sigma_fx, true).sum();
   vector<Type> fx(exp(log_fx));
-  Map<Matrix<Type, Dynamic, Dynamic>> fx_mat(fx.data(), fx_span, n_steps);
+  MapMatrixXXt fx_mat(fx.data(), fx_span, n_steps);
 
   // prior for gx
   PARAMETER_VECTOR(gx);
   nll -= dnorm(gx, gx_mean, sigma_gx, true).sum();
-  Map<Matrix<Type, Dynamic, Dynamic>> gx_mat(gx.data(), basepop.size(), n_steps);
+  MapMatrixXXt gx_mat(gx.data(), basepop.size(), n_steps);
 
   // population projection
-  matrix<Type> projpop(ccmpp<Type>(basepop, sx_mat, fx_mat, gx_mat,
-				   srb, age_span, fx_idx-1).population);
+  PopulationProjection<Type> proj(ccmpp<Type>(basepop, sx_mat, fx_mat, gx_mat,
+					      srb, age_span, fx_idx-1));
   
   // likelihood for log census counts
   for(int i = 0; i < census_year_idx.size(); i++) {
     nll -= dnorm(vector<Type>(census_log_pop.col(i)),
-  		 log(vector<Type>(projpop.col(census_year_idx[i] - 1))),
+  		 log(vector<Type>(proj.population.col(census_year_idx[i] - 1))),
   		 sigma_logpop, true).sum();
   }
 
-  vector<Type> population(Map<Matrix<Type, Dynamic, 1>>(projpop.data(), projpop.size(), 1));
+  vector<Type> population(MapVectorXt(proj.population.data(),
+				      proj.population.size()));
+  vector<Type> deaths(MapVectorXt(proj.deaths.data(),
+				  proj.deaths.size()));
+  vector<Type> births(MapVectorXt(proj.births.data(),
+				  proj.births.size()));
+  vector<Type> infants(MapVectorXt(proj.infants.data(),
+				   proj.infants.size()));
+  vector<Type> migrations(MapVectorXt(proj.migrations.data(),
+				      proj.migrations.size()));
   REPORT(population);
+  REPORT(deaths);
+  REPORT(births);
+  REPORT(infants);
+  REPORT(migrations);
   REPORT(sx);
   REPORT(fx);
   REPORT(gx);
