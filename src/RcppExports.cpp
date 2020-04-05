@@ -22,7 +22,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // ccmppR
-Eigen::MatrixXd ccmppR(const Eigen::Map<Eigen::VectorXd> basepop, const Eigen::Map<Eigen::MatrixXd> sx, const Eigen::Map<Eigen::MatrixXd> fx, const Eigen::Map<Eigen::MatrixXd> gx, const Eigen::Map<Eigen::VectorXd> srb, double age_span, int fx_idx);
+Rcpp::List ccmppR(const Eigen::Map<Eigen::VectorXd> basepop, const Eigen::Map<Eigen::MatrixXd> sx, const Eigen::Map<Eigen::MatrixXd> fx, const Eigen::Map<Eigen::MatrixXd> gx, const Eigen::Map<Eigen::VectorXd> srb, double age_span, int fx_idx);
 RcppExport SEXP _leapfrog_ccmppR(SEXP basepopSEXP, SEXP sxSEXP, SEXP fxSEXP, SEXP gxSEXP, SEXP srbSEXP, SEXP age_spanSEXP, SEXP fx_idxSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;

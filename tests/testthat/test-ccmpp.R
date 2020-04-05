@@ -37,7 +37,7 @@ test_that("population projection matches popReconstruct implementation", {
                     age_span = 5,
                     fx_idx = 4)
 
-  expect_equal(popproj, popproj_check)
+  expect_equal(popproj$population, popproj_check)
   
 })
 
@@ -46,13 +46,13 @@ test_that("array-based and Leslie matrix population projection match", {
   data(burkina_faso_females, package = "popReconstruct")
   bff <- burkina.faso.females
 
-  popproj_leslie <- ccmppR(basepop = as.numeric(bff$baseline.pop.counts),
-                           sx = bff$survival.proportions,
-                           fx = bff$fertility.rates[4:10, ],
-                           gx = bff$migration.proportions,
-                           srb = rep(1.05, ncol(bff$survival.proportions)),
-                           age_span = 5,
-                           fx_idx = 4)
+  popproj_leslie <- ccmpp_leslieR(basepop = as.numeric(bff$baseline.pop.counts),
+                                  sx = bff$survival.proportions,
+                                  fx = bff$fertility.rates[4:10, ],
+                                  gx = bff$migration.proportions,
+                                  srb = rep(1.05, ncol(bff$survival.proportions)),
+                                  age_span = 5,
+                                  fx_idx = 4)
   
   popproj <- ccmppR(basepop = as.numeric(bff$baseline.pop.counts),
                     sx = bff$survival.proportions,
@@ -62,6 +62,6 @@ test_that("array-based and Leslie matrix population projection match", {
                     age_span = 5,
                     fx_idx = 4)
   
-  expect_equal(popproj_leslie, popproj)
+  expect_equal(popproj_leslie, popproj$population)
   
 })
