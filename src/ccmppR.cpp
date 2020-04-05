@@ -82,7 +82,7 @@ ccmppR(const Eigen::Map<Eigen::VectorXd> basepop,
        double age_span,
        int fx_idx) {
   
-  return ccmpp<double>(basepop, sx, fx, gx, srb, age_span, fx_idx - 1);
+  return ccmpp<double>(basepop, sx, fx, gx, srb, age_span, fx_idx - 1).population;
 }
 
 //' @rdname ccmppR
