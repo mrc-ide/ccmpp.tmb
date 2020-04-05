@@ -73,10 +73,10 @@ make_leslie_matrixR <- function(sx, fx, srb, age_span, fx_idx) {
 #' bf_srb <- rep(1.05, ncol(burkina.faso.females$survival.proportions))
 #'
 #' pop_leslie <- ccmpp_leslieR(basepop = bf_basepop, sx = bf_sx, fx = bf_fx,
-#'                             gx = bf_gx, srb = bf_srb, srb = bf_srb,
+#'                             gx = bf_gx, srb = bf_srb, 
 #'                             age_span = 5, fx_idx = 4)
 #' pop_proj <- ccmppR(basepop = bf_basepop, sx = bf_sx, fx = bf_fx,
-#'                    gx = bf_gx, srb = bf_srb, srb = bf_srb,
+#'                    gx = bf_gx, srb = bf_srb, 
 #'                    age_span = 5, fx_idx = 4)
 #' 
 #' all(pop_leslie == pop_proj$population)
