@@ -53,27 +53,46 @@ make_leslie_matrixR(const Eigen::Map<Eigen::ArrayXd> sx,
 //' @param age_span the interval for age and projection time step.
 //' @param fx_idx first in
 //'
-//' @return A matrix of projected population at each step
+//' @return
+//' `ccmppR()` returns a list with matrices for population, (cohort)
+//' deaths, births by age, number of infants, and migrations.
+//'
+//' `ccmpp_leslieR()` simulates the same population projection using a 
+//' Leslie matrix formulation and returns a matrix of population. This
+//' is exactly equal to `population` returned by `ccmppR()` (see examples).
 //'
 //' @details
 //' Arguments `sx`, `fx`, and `gx` are matrices with one column for each
 //' projection period, and `srb` is a vector of length number of projection 
 //' periods.
 //'
+//' The number of age groups in the deaths array are one greater than then number
+//' of age groups because deaths are counted separately for those ageing into
+//' the open ended age group and survivors in the open ended age group.
+//'
 //' @examples
 //'
 //' library(popReconstruct)
 //' data(burkina_faso_females)
-//' ccmppR(basepop = as.numeric(burkina.faso.females$baseline.pop.counts),
-//'        sx = burkina.faso.females$survival.proportions,
-//'        fx = burkina.faso.females$fertility.rates[4:10, 1],
-//'        gx = burkina.faso.females$migration.proportions,
-//'        srb = rep(1.05, ncol(burkina.faso.females$survival.proportions)),
-//'        age_span = 5,
-//'        fx_idx = 4)
+//'
+//' bf_basepop <- as.numeric(burkina.faso.females$baseline.pop.counts)
+//' bf_sx <- burkina.faso.females$survival.proportions
+//' bf_fx <- burkina.faso.females$fertility.rates[4:10, 1]
+//' bf_gx <- burkina.faso.females$migration.proportions
+//' bf_srb <- rep(1.05, ncol(burkina.faso.females$survival.proportions))
+//'
+//' pop_leslie <- ccmpp_leslieR(basepop = bf_basepop, sx = bf_sx, fx = bf_fx,
+//'                             gx = bf_gx, srb = bf_srb, 
+//'                             age_span = 5, fx_idx = 4)
+//' pop_proj <- ccmppR(basepop = bf_basepop, sx = bf_sx, fx = bf_fx,
+//'                    gx = bf_gx, srb = bf_srb, 
+//'                    age_span = 5, fx_idx = 4)
+//' 
+//' all(pop_leslie == pop_proj$population)
+//'
 //' @export
 // [[Rcpp::export]]
-Eigen::MatrixXd
+Rcpp::List
 ccmppR(const Eigen::Map<Eigen::VectorXd> basepop,
        const Eigen::Map<Eigen::MatrixXd> sx,
        const Eigen::Map<Eigen::MatrixXd> fx,
@@ -81,6 +100,28 @@ ccmppR(const Eigen::Map<Eigen::VectorXd> basepop,
        const Eigen::Map<Eigen::VectorXd> srb,
        double age_span,
        int fx_idx) {
+
+  PopulationProjection<double> proj(ccmpp<double>(basepop, sx, fx, gx, srb, age_span, fx_idx - 1));
+
+  // !! NOTE: is this copying memory?
+  return Rcpp::List::create(Rcpp::Named("population") = proj.population,
+			    Rcpp::Named("deaths") = proj.deaths,
+			    Rcpp::Named("births") = proj.births,
+			    Rcpp::Named("infants") = proj.infants,
+			    Rcpp::Named("migrations") = proj.migrations);
+}
+
+//' @rdname ccmppR
+//' @export
+// [[Rcpp::export]]
+Eigen::MatrixXd
+ccmpp_leslieR(const Eigen::Map<Eigen::VectorXd> basepop,
+	      const Eigen::Map<Eigen::MatrixXd> sx,
+	      const Eigen::Map<Eigen::MatrixXd> fx,
+	      const Eigen::Map<Eigen::MatrixXd> gx,
+	      const Eigen::Map<Eigen::VectorXd> srb,
+	      double age_span,
+	      int fx_idx) {
   
-  return ccmpp<double>(basepop, sx, fx, gx, srb, age_span, fx_idx - 1);
+  return ccmpp_leslie<double>(basepop, sx, fx, gx, srb, age_span, fx_idx - 1);
 }

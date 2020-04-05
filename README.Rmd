@@ -63,7 +63,7 @@ pop_proj <- ccmppR(basepop = as.numeric(burkina.faso.females$baseline.pop.counts
                    srb = rep(1.05, ncol(burkina.faso.females$survival.proportions)),
                    age_span = 5,
                    fx_idx = 4)
-pop_proj[ , c(1, 2, ncol(pop_proj))]
+pop_proj$population[ , c(1, 2, 10)]
 
 ```
 
@@ -113,9 +113,11 @@ par <- list(log_tau2_logpop = 0,
 
 obj <- make_tmb_obj(data, par)
 
+init_sim <- obj$report()
+matrix(init_sim$population, nrow = 17)[ , data$census_year_idx]
+
 obj$fn()
 
-matrix(obj$report()$population, nrow = 17)[ , data$census_year_idx]
 
 input <- list(data = data, par_init = par)
 fit <- fit_tmb(input)
@@ -129,11 +131,14 @@ Sample from posterior distribution and generate outputs
 ```{r sample_tmb}
 fit <- sample_tmb(fit)
 
+
+
 colnames(fit$sample$population) <- 1:ncol(fit$sample$population)
+colnames(fit$sample$migrations) <- 1:ncol(fit$sample$migrations)
 colnames(fit$sample$fx) <- 1:ncol(fit$sample$fx)
 
-init_pop_mat <- ccmppR(basepop_init, sx_init, fx_init, gx_init,
-                       srb = rep(1.05, ncol(sx_init)), age_span = 5, fx_idx = 4)
+init_pop_mat <- ccmpp_leslieR(basepop_init, sx_init, fx_init, gx_init,
+                              srb = rep(1.05, ncol(sx_init)), age_span = 5, fx_idx = 4)
 
 df <- crossing(year = seq(1960, 2015, 5),
                sex = "female",
@@ -142,13 +147,13 @@ df <- crossing(year = seq(1960, 2015, 5),
 
 census_pop <- crossing(sex = "female",
                        age_group = c(sprintf("%02d-%02d", 0:15*5, 0:15*5+4), "80+")) %>%
-  bind_cols(as.tibble(burkina.faso.females$census.pop.counts)) %>%
+  bind_cols(as_tibble(burkina.faso.females$census.pop.counts)) %>%
   gather(year, census_pop, `1975`:`2005`) %>%
   type_convert(cols(year = col_double()))
 
 df <- df %>%
   left_join(census_pop) %>%
-  bind_cols(as.tibble(fit$sample$population)) %>%
+  bind_cols(as_tibble(fit$sample$population)) %>%
   gather(sample, value, `1`:last_col())
 
 agepop <- df %>%
@@ -207,7 +212,7 @@ Posterior distribution for TFR:
 asfr <- crossing(year = seq(1960, 2010, 5),
                  age_group = sprintf("%02d-%02d", 3:9*5, 3:9*5+4)) %>%
   mutate(init_asfr = as.vector(fx_init)) %>%
-  bind_cols(as.tibble(fit$sample$fx)) %>%
+  bind_cols(as_tibble(fit$sample$fx)) %>%
   gather(sample, value, `1`:last_col()) 
 
 tfr <- asfr %>%
@@ -232,39 +237,95 @@ ggplot(tfr, aes(year, mean, ymin = lower, ymax = upper)) +
 
 ```
 
+```{r migrations, fig.height = 4, fig.width = 5, fig.align = "center", out.width = "60%"}
+
+migrations <- crossing(year = seq(1960, 2010, 5),
+                       age_lower = 0:16*5) %>%
+  mutate(init_migrations = init_sim$migrations) %>%
+  bind_cols(as_tibble(fit$sample$migrations)) %>%
+  gather(sample, value, `1`:last_col()) 
+
+total_migrations <- migrations %>%
+  group_by(year, sample) %>%
+  summarise(init_migrations = 5 * sum(init_migrations),
+            value = 5 * sum(value)) %>%
+  group_by(year) %>%
+  summarise(init_migrations = mean(init_migrations),
+         mean = mean(value),
+         lower = quantile(value, 0.025),
+         upper = quantile(value, 0.975))
+
+ggplot(total_migrations, aes(year, mean, ymin = lower, ymax = upper)) +
+  geom_ribbon(alpha = 0.2) +
+  geom_line() +
+  geom_line(aes(y = init_migrations), linetype = "dashed") +
+  scale_y_continuous("Net migration (1000s)",
+                     labels = scales::number_format(scale=1e-3)) +
+  labs(x = NULL) +
+  theme_light() +
+  theme(panel.grid = element_blank()) +
+  ggtitle("BFA: total net migrations (1000s)")
+
+```
+
+
+## Code design
+
+### Simulation model
+
+The simulation model is implemented as templated C++ code in `src/ccmpp.h`.
+This is  the simulation model may be developed as a standalone C++ library
+that can be called by other software without requiring R-specific code features.
+The code uses header-only open source libraries to maximize portability.
+
+
+### Statistical inference
+
+The objective function (the negative log posterior density) is implemented 
+in templated C++ code in the script `src/TMB/ccmpp_tmb.hpp` using probability 
+functions from the Template Model Builder ([TMB](https://github.com/kaskr/adcomp/wiki)) 
+R package. The TMB package provides estimates of the gradient
+of the objective function via automatic differentiation and Laplace approximation
+to integrate random effects. 
+
+The posterior density can also be sampled from using Hamiltonian Monte Carlo in 
+Stan using the [_tmbstan_](https://cran.r-project.org/web/packages/tmbstan/index.html) package.
+
+Latent Gaussian models for model components (fertiliy rates, mortality rates,
+migration rates) are implemented using linear algebra tools from the _Eigen_ 
+package. Predicted values are coerced into arrays for the CCMPP model inputs.
+
+
+### R functions
+
+The file `src/ccmppR.cpp` contains R wrapper functions for the model simulation 
+via [Rcpp](http://dirk.eddelbuettel.com/code/rcpp.html) and 
+[RcppEigen](http://dirk.eddelbuettel.com/code/rcpp.eigen.html).
 
 
 ## Development notes
 
-The simulation model is implemented as templated C++ code in `src/ccmpp.h` 
-such that the simulation model may be developed as a standalone C++ library
-that can be called by other software without requiring R-specific code features.
+### Simulation model
 
-* Presently the CCMPP model is implemented as a sparse Leslie matrix formulation. 
-  In future, this will probably be split into multiple steps to save intermediate
-  computations of demographic events (births, deaths, migrations).
-* In future a class structure will probably be developed.
+* The CCMPP model is implemented as a sparse Leslie matrix formulation and using
+  direct calculation of the projection in arrays so that interim outputs (deaths,
+  births, migrations) are also saved. The array-based implementation appears to 
+  be faster.
+* Class structure for popualtion projection model needs review.
 * Specifying static dimensions for the state space may improve efficiency. This 
   should be possible for common options (5x5 year, 1x1 year) through templating.
-  
-The file `src/ccmppR.cpp` contains R wrapper functions for the model simulation 
-via [Rcpp](http://dirk.eddelbuettel.com/code/rcpp.html) and 
-[RcppEigen](http://dirk.eddelbuettel.com/code/rcpp.eigen.html).
-  
-The objective function (the negative log posterior) is implemented in templated 
-C++ code using probability functions from the Template Model Builder 
-([TMB](https://github.com/kaskr/adcomp/wiki)) R package. Implementation in TMB
-provides gradient functions via automatic differentiation (AD).
+* The model was implemented using _Eigen_ containers following the initial sparse
+  Leslie matrix specification. However, multi-dimensional arrays in the _boost_
+  library may be preferable. 
+
+### TMB
 
 * Further investigation is needed about the portability of AD objective function
   DLLs outside of the R environment.
 
-TMB also contains R functions for approximation integration of arbitrary random
-effects via Laplace approximation.
-
 TMB model code and testing are implemented following templates from the 
 [`TMBtools`](https://github.com/mlysy/TMBtools) package with guidance for package 
 development with both TMB models and Rcpp code. 
-  * To add a new TMB model, save the model template in the `src/TMB` with extension `.pp`. The model name must match the file name. The signature is slightly different -- see other `.hpp` files for example.
+  * To add a new TMB model, save the model template in the `src/TMB` with extension `.hpp`. The model name must match the file name. The signature is slightly different -- see other `.hpp` files for example.
   * Call `TMBtools::export_models()` to export the new TMB model to the meta-model list.
   * When constructing the objective function with `TMB::MakeADFun`, use `DLL= "leapfrog_TMBExports"` and add an additional value `model = "<model_name>"` to the `data` list.
