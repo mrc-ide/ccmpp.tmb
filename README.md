@@ -39,6 +39,7 @@ Construct a sparse Leslie matrix:
 library(tidyverse)
 library(leapfrog)
 library(popReconstruct)
+#> Loading required package: coda
 
 data(burkina_faso_females)
 
@@ -86,7 +87,8 @@ make_leslie_matrixR(sx = burkina.faso.females$survival.proportions[,1],
 #> [17,] .         0.3181678 0.2099861
 ```
 
-Simulate a cohort component population projection:
+Simulate a cohort component population
+projection:
 
 ``` r
 pop_proj <- ccmppR(basepop = as.numeric(burkina.faso.females$baseline.pop.counts),
@@ -235,8 +237,8 @@ fit <- sample_tmb(fit)
 colnames(fit$sample$population) <- 1:ncol(fit$sample$population)
 colnames(fit$sample$fx) <- 1:ncol(fit$sample$fx)
 
-init_pop_mat <- ccmppR(basepop_init, sx_init, fx_init, gx_init,
-                       srb = rep(1.05, ncol(sx_init)), age_span = 5, fx_idx = 4)
+init_pop_mat <- ccmpp_leslieR(basepop_init, sx_init, fx_init, gx_init,
+                              srb = rep(1.05, ncol(sx_init)), age_span = 5, fx_idx = 4)
 
 df <- crossing(year = seq(1960, 2015, 5),
                sex = "female",
@@ -245,15 +247,13 @@ df <- crossing(year = seq(1960, 2015, 5),
 
 census_pop <- crossing(sex = "female",
                        age_group = c(sprintf("%02d-%02d", 0:15*5, 0:15*5+4), "80+")) %>%
-  bind_cols(as.tibble(burkina.faso.females$census.pop.counts)) %>%
+  bind_cols(as_tibble(burkina.faso.females$census.pop.counts)) %>%
   gather(year, census_pop, `1975`:`2005`) %>%
   type_convert(cols(year = col_double()))
-#> Warning: `as.tibble()` is deprecated, use `as_tibble()` (but mind the new semantics).
-#> This warning is displayed once per session.
 
 df <- df %>%
   left_join(census_pop) %>%
-  bind_cols(as.tibble(fit$sample$population)) %>%
+  bind_cols(as_tibble(fit$sample$population)) %>%
   gather(sample, value, `1`:last_col())
 #> Joining, by = c("year", "sex", "age_group")
 
@@ -319,7 +319,7 @@ Posterior distribution for TFR:
 asfr <- crossing(year = seq(1960, 2010, 5),
                  age_group = sprintf("%02d-%02d", 3:9*5, 3:9*5+4)) %>%
   mutate(init_asfr = as.vector(fx_init)) %>%
-  bind_cols(as.tibble(fit$sample$fx)) %>%
+  bind_cols(as_tibble(fit$sample$fx)) %>%
   gather(sample, value, `1`:last_col()) 
 
 tfr <- asfr %>%
@@ -381,7 +381,7 @@ TMB model code and testing are implemented following templates from the
 [`TMBtools`](https://github.com/mlysy/TMBtools) package with guidance
 for package development with both TMB models and Rcpp code. \* To add a
 new TMB model, save the model template in the `src/TMB` with extension
-`.pp`. The model name must match the file name. The signature is
+`.hpp`. The model name must match the file name. The signature is
 slightly different – see other `.hpp` files for example. \* Call
 `TMBtools::export_models()` to export the new TMB model to the
 meta-model list. \* When constructing the objective function with

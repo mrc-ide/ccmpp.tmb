@@ -64,13 +64,13 @@ make_leslie_matrixR(const Eigen::Map<Eigen::ArrayXd> sx,
 //'
 //' library(popReconstruct)
 //' data(burkina_faso_females)
-//' ccmppR(basepop = as.numeric(burkina.faso.females$baseline.pop.counts),
-//'        sx = burkina.faso.females$survival.proportions,
-//'        fx = burkina.faso.females$fertility.rates[4:10, 1],
-//'        gx = burkina.faso.females$migration.proportions,
-//'        srb = rep(1.05, ncol(burkina.faso.females$survival.proportions)),
-//'        age_span = 5,
-//'        fx_idx = 4)
+//' ccmpp_leslieR(basepop = as.numeric(burkina.faso.females$baseline.pop.counts),
+//'               sx = burkina.faso.females$survival.proportions,
+//'               fx = burkina.faso.females$fertility.rates[4:10, 1],
+//'               gx = burkina.faso.females$migration.proportions,
+//'               srb = rep(1.05, ncol(burkina.faso.females$survival.proportions)),
+//'               age_span = 5,
+//'               fx_idx = 4)
 //' @export
 // [[Rcpp::export]]
 Eigen::MatrixXd
@@ -83,4 +83,19 @@ ccmppR(const Eigen::Map<Eigen::VectorXd> basepop,
        int fx_idx) {
   
   return ccmpp<double>(basepop, sx, fx, gx, srb, age_span, fx_idx - 1);
+}
+
+//' @rdname ccmppR
+//' @export
+// [[Rcpp::export]]
+Eigen::MatrixXd
+ccmpp_leslieR(const Eigen::Map<Eigen::VectorXd> basepop,
+	      const Eigen::Map<Eigen::MatrixXd> sx,
+	      const Eigen::Map<Eigen::MatrixXd> fx,
+	      const Eigen::Map<Eigen::MatrixXd> gx,
+	      const Eigen::Map<Eigen::VectorXd> srb,
+	      double age_span,
+	      int fx_idx) {
+  
+  return ccmpp_leslie<double>(basepop, sx, fx, gx, srb, age_span, fx_idx - 1);
 }

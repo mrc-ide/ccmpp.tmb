@@ -2,9 +2,12 @@
 % Please edit documentation in R/RcppExports.R
 \name{ccmppR}
 \alias{ccmppR}
+\alias{ccmpp_leslieR}
 \title{Simulate cohort component population projection}
 \usage{
 ccmppR(basepop, sx, fx, gx, srb, age_span, fx_idx)
+
+ccmpp_leslieR(basepop, sx, fx, gx, srb, age_span, fx_idx)
 }
 \arguments{
 \item{basepop}{vector of baseline population size.}
@@ -36,11 +39,11 @@ periods.
 
 library(popReconstruct)
 data(burkina_faso_females)
-ccmppR(basepop = as.numeric(burkina.faso.females$baseline.pop.counts),
-       sx = burkina.faso.females$survival.proportions,
-       fx = burkina.faso.females$fertility.rates[4:10, 1],
-       gx = burkina.faso.females$migration.proportions,
-       srb = rep(1.05, ncol(burkina.faso.females$survival.proportions)),
-       age_span = 5,
-       fx_idx = 4)
+ccmpp_leslieR(basepop = as.numeric(burkina.faso.females$baseline.pop.counts),
+              sx = burkina.faso.females$survival.proportions,
+              fx = burkina.faso.females$fertility.rates[4:10, 1],
+              gx = burkina.faso.females$migration.proportions,
+              srb = rep(1.05, ncol(burkina.faso.females$survival.proportions)),
+              age_span = 5,
+              fx_idx = 4)
 }

@@ -73,8 +73,8 @@ Type ccmpp_tmb(objective_function<Type>* obj)
   Map<Matrix<Type, Dynamic, Dynamic>> gx_mat(gx.data(), basepop.size(), n_steps);
 
   // population projection
-  matrix<Type> projpop(ccmpp<Type>(basepop, sx_mat, fx_mat, gx_mat,
-				   srb, age_span, fx_idx-1));
+  matrix<Type> projpop(ccmpp_leslie<Type>(basepop, sx_mat, fx_mat, gx_mat,
+					  srb, age_span, fx_idx-1));
 
   // likelihood for log census counts
   for(int i = 0; i < census_year_idx.size(); i++) {
