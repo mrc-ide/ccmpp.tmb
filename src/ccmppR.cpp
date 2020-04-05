@@ -54,12 +54,12 @@ make_leslie_matrixR(const Eigen::Map<Eigen::ArrayXd> sx,
 //' @param fx_idx first in
 //'
 //' @return
-//  The function `ccmppR()` returns a list with matrices for population, (cohort)
+//' `ccmppR()` returns a list with matrices for population, (cohort)
 //' deaths, births by age, number of infants, and migrations.
 //'
-//' `ccmpp_leslieR()` simulates the same population projection using a Leslie
-//' matrix formulation and returns a matrix of population. This is exactly equal
-//' to `population` returned by `ccmppR()` (see examples).
+//' `ccmpp_leslieR()` simulates the same population projection using a 
+//' Leslie matrix formulation and returns a matrix of population. This
+//' is exactly equal to `population` returned by `ccmppR()` (see examples).
 //'
 //' @details
 //' Arguments `sx`, `fx`, and `gx` are matrices with one column for each

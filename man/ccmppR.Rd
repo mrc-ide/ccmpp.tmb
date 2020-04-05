@@ -25,7 +25,12 @@ ccmpp_leslieR(basepop, sx, fx, gx, srb, age_span, fx_idx)
 \item{fx_idx}{first in}
 }
 \value{
-A matrix of projected population at each step
+`ccmppR()` returns a list with matrices for population, (cohort)
+deaths, births by age, number of infants, and migrations.
+
+`ccmpp_leslieR()` simulates the same population projection using a 
+Leslie matrix formulation and returns a matrix of population. This
+is exactly equal to `population` returned by `ccmppR()` (see examples).
 }
 \description{
 Simulate cohort component population projection
@@ -34,16 +39,29 @@ Simulate cohort component population projection
 Arguments `sx`, `fx`, and `gx` are matrices with one column for each
 projection period, and `srb` is a vector of length number of projection 
 periods.
+
+The number of age groups in the deaths array are one greater than then number
+of age groups because deaths are counted separately for those ageing into
+the open ended age group and survivors in the open ended age group.
 }
 \examples{
 
 library(popReconstruct)
 data(burkina_faso_females)
-ccmpp_leslieR(basepop = as.numeric(burkina.faso.females$baseline.pop.counts),
-              sx = burkina.faso.females$survival.proportions,
-              fx = burkina.faso.females$fertility.rates[4:10, 1],
-              gx = burkina.faso.females$migration.proportions,
-              srb = rep(1.05, ncol(burkina.faso.females$survival.proportions)),
-              age_span = 5,
-              fx_idx = 4)
+
+bf_basepop <- as.numeric(burkina.faso.females$baseline.pop.counts)
+bf_sx <- burkina.faso.females$survival.proportions,		   
+bf_fx <- burkina.faso.females$fertility.rates[4:10, 1],		   
+bf_gx <- burkina.faso.females$migration.proportions,		   
+bf_srb <- rep(1.05, ncol(burkina.faso.females$survival.proportions)),
+
+pop_leslie <- ccmpp_leslieR(basepop = bf_basepop, sx = bf_sx, fx = bf_fx,
+                            gx = bf_gx, srb = bf_srb, srb = bf_srb,
+                            age_span = 5, fx_idx = 4)
+pop_proj <- ccmppR(basepop = bf_basepop, sx = bf_sx, fx = bf_fx,
+                   gx = bf_gx, srb = bf_srb, srb = bf_srb,
+                   age_span = 5, fx_idx = 4)
+
+all(pop_leslie == pop_proj$population)
+
 }
