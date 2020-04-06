@@ -37,8 +37,10 @@ Construct a sparse Leslie matrix:
 
 ``` r
 library(tidyverse)
+#> Warning: package 'tibble' was built under R version 3.6.2
 library(leapfrog)
 library(popReconstruct)
+#> Loading required package: coda
 
 data(burkina_faso_females)
 
@@ -358,8 +360,8 @@ migrations <- crossing(year = seq(1960, 2010, 5),
 
 total_migrations <- migrations %>%
   group_by(year, sample) %>%
-  summarise(init_migrations = 5 * sum(init_migrations),
-            value = 5 * sum(value)) %>%
+  summarise(init_migrations = sum(init_migrations),
+            value = sum(value)) %>%
   group_by(year) %>%
   summarise(init_migrations = mean(init_migrations),
          mean = mean(value),
