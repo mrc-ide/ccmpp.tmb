@@ -13,7 +13,7 @@ bff_data <- list(log_basepop_mean = log(bff_basepop),
                  age_span = 5,
                  n_steps = ncol(burkina.faso.females$survival.proportions),
                  fx_idx = 4L,
-                 fx_span = 7L,
+                 n_fx = 7L,
                  census_log_pop = log(burkina.faso.females$census.pop.counts),
                  census_year_idx = c(4L, 6L, 8L, 10L))
 

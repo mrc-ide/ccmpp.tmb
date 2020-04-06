@@ -37,8 +37,10 @@ Construct a sparse Leslie matrix:
 
 ``` r
 library(tidyverse)
+#> Warning: package 'tibble' was built under R version 3.6.2
 library(leapfrog)
 library(popReconstruct)
+#> Loading required package: coda
 
 data(burkina_faso_females)
 
@@ -148,7 +150,7 @@ data <- list(log_basepop_mean = log_basepop_mean,
              age_span = 5,
              n_steps = ncol(sx_init),
              fx_idx = 4L,
-             fx_span = 7L,
+             n_fx = 7L,
              census_log_pop = log(burkina.faso.females$census.pop.counts),
              census_year_idx = c(4L, 6L, 8L, 10L))
 par <- list(log_tau2_logpop = 0,

@@ -26,7 +26,7 @@ Type ccmpp_tmb(objective_function<Type>* obj)
   DATA_SCALAR(age_span);
   DATA_INTEGER(n_steps);
   DATA_INTEGER(fx_idx);
-  DATA_INTEGER(fx_span);
+  DATA_INTEGER(n_fx);
 
   // census data
   DATA_MATRIX(census_log_pop);
@@ -69,7 +69,7 @@ Type ccmpp_tmb(objective_function<Type>* obj)
   PARAMETER_VECTOR(log_fx);
   nll -= dnorm(log_fx, log_fx_mean, sigma_fx, true).sum();
   vector<Type> fx(exp(log_fx));
-  MapMatrixXXt fx_mat(fx.data(), fx_span, n_steps);
+  MapMatrixXXt fx_mat(fx.data(), n_fx, n_steps);
 
   // prior for gx
   PARAMETER_VECTOR(gx);
