@@ -37,10 +37,8 @@ Construct a sparse Leslie matrix:
 
 ``` r
 library(tidyverse)
-#> Warning: package 'tibble' was built under R version 3.6.2
 library(leapfrog)
 library(popReconstruct)
-#> Loading required package: coda
 
 data(burkina_faso_females)
 
@@ -148,7 +146,7 @@ data <- list(log_basepop_mean = log_basepop_mean,
              gx_mean = gx_mean,
              srb = rep(1.05, ncol(sx_init)),
              interval = 5,
-             n_steps = ncol(sx_init),
+             n_periods = ncol(sx_init),
              fx_idx = 4L,
              n_fx = 7L,
              census_log_pop = log(burkina.faso.females$census.pop.counts),
@@ -442,11 +440,14 @@ simulation via [Rcpp](http://dirk.eddelbuettel.com/code/rcpp.html) and
 
 TMB model code and testing are implemented following templates from the
 [`TMBtools`](https://github.com/mlysy/TMBtools) package with guidance
-for package development with both TMB models and Rcpp code. \* To add a
-new TMB model, save the model template in the `src/TMB` with extension
-`.hpp`. The model name must match the file name. The signature is
-slightly different – see other `.hpp` files for example. \* Call
-`TMBtools::export_models()` to export the new TMB model to the
-meta-model list. \* When constructing the objective function with
-`TMB::MakeADFun`, use `DLL= "leapfrog_TMBExports"` and add an additional
-value `model = "<model_name>"` to the `data` list.
+for package development with both TMB models and Rcpp code.
+
+  - To add a new TMB model, save the model template in the `src/TMB`
+    with extension `.hpp`. The model name must match the file name. The
+    signature is slightly different – see other `.hpp` files for
+    example.
+  - Call `TMBtools::export_models()` to export the new TMB model to the
+    meta-model list.
+  - When constructing the objective function with `TMB::MakeADFun`, use
+    `DLL= "leapfrog_TMBExports"` and add an additional value `model =
+    "<model_name>"` to the `data` list.

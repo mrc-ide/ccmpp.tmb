@@ -24,7 +24,7 @@ Type ccmpp_tmb(objective_function<Type>* obj)
   DATA_VECTOR(gx_mean);
   DATA_VECTOR(srb);
   DATA_SCALAR(interval);
-  DATA_INTEGER(n_steps);
+  DATA_INTEGER(n_periods);
   DATA_INTEGER(fx_idx);
   DATA_INTEGER(n_fx);
 
@@ -63,18 +63,18 @@ Type ccmpp_tmb(objective_function<Type>* obj)
   PARAMETER_VECTOR(logit_sx);
   nll -= dnorm(logit_sx, logit_sx_mean, sigma_sx, true).sum();
   vector<Type> sx(invlogit(logit_sx));
-  MapMatrixXXt sx_mat(sx.data(), basepop.size() + 1, n_steps);
+  MapMatrixXXt sx_mat(sx.data(), basepop.size() + 1, n_periods);
 
   // prior for log(fx)
   PARAMETER_VECTOR(log_fx);
   nll -= dnorm(log_fx, log_fx_mean, sigma_fx, true).sum();
   vector<Type> fx(exp(log_fx));
-  MapMatrixXXt fx_mat(fx.data(), n_fx, n_steps);
+  MapMatrixXXt fx_mat(fx.data(), n_fx, n_periods);
 
   // prior for gx
   PARAMETER_VECTOR(gx);
   nll -= dnorm(gx, gx_mean, sigma_gx, true).sum();
-  MapMatrixXXt gx_mat(gx.data(), basepop.size(), n_steps);
+  MapMatrixXXt gx_mat(gx.data(), basepop.size(), n_periods);
 
   // population projection
   PopulationProjection<Type> proj(ccmpp<Type>(basepop, sx_mat, fx_mat, gx_mat,

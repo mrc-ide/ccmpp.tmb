@@ -73,7 +73,7 @@ class PopulationProjection {
  public: 
 
   const int n_ages;
-  const int n_steps;
+  const int n_periods;
   const int n_fx;    // number of age groups eligible for fertility
   const int fx_idx;  // first age index eligible for fertility
   const Type interval;
@@ -90,7 +90,7 @@ class PopulationProjection {
   MatrixXXT migrations;
     
  PopulationProjection(const int n_ages,
-		      const int n_steps,
+		      const int n_periods,
 		      const int n_fx,
 		      const int fx_idx,
 		      const Type interval,
@@ -100,7 +100,7 @@ class PopulationProjection {
 		      const Eigen::Array<Type, Eigen::Dynamic, Eigen::Dynamic>& gx,
 		      const Eigen::Array<Type, Eigen::Dynamic, 1>& srb) :
     n_ages{ n_ages },
-    n_steps{ n_steps },
+    n_periods{ n_periods },
     n_fx{ n_fx },
     fx_idx{ fx_idx },
     interval{ interval },
@@ -108,11 +108,11 @@ class PopulationProjection {
     fx{ fx },
     gx{ gx },
     srb{ srb },
-    population{ MatrixXXT(n_ages, n_steps + 1) },
-    cohort_deaths{ MatrixXXT(n_ages+1, n_steps) },
-    births{ MatrixXXT(n_fx, n_steps) },
-    infants{ Eigen::Matrix<Type, 1, Eigen::Dynamic>(n_steps) },
-    migrations{ MatrixXXT(n_ages, n_steps) }
+    population{ MatrixXXT(n_ages, n_periods + 1) },
+    cohort_deaths{ MatrixXXT(n_ages+1, n_periods) },
+    births{ MatrixXXT(n_fx, n_periods) },
+    infants{ Eigen::Matrix<Type, 1, Eigen::Dynamic>(n_periods) },
+    migrations{ MatrixXXT(n_ages, n_periods) }
     {
       population.col(0) = basepop;
     };
@@ -185,14 +185,14 @@ ccmpp(const Eigen::Matrix<Type, Eigen::Dynamic, 1>& basepop,
       const Type interval,
       const int fx_idx) {
 
-  int n_steps(sx.cols());
+  int n_periods(sx.cols());
   int n_ages(basepop.rows());
   int n_fx(fx.rows());
 
-  PopulationProjection<Type> proj(n_ages, n_steps, n_fx, fx_idx, interval,
+  PopulationProjection<Type> proj(n_ages, n_periods, n_fx, fx_idx, interval,
 				  basepop, sx, fx, gx, srb);
 
-  for(int step = 0; step < n_steps; step++) {
+  for(int step = 0; step < n_periods; step++) {
     proj.step_projection(step);
   }
 
