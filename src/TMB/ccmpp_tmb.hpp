@@ -58,7 +58,7 @@ Type ccmpp_tmb(objective_function<Type>* obj)
   PARAMETER_VECTOR(log_basepop);
   nll -= dnorm(log_basepop, log_basepop_mean, sigma_logpop, true).sum();
   vector<Type> basepop(exp(log_basepop));
-
+  
   // prior for logit(Sx)
   PARAMETER_VECTOR(logit_sx);
   nll -= dnorm(logit_sx, logit_sx_mean, sigma_sx, true).sum();
@@ -87,25 +87,30 @@ Type ccmpp_tmb(objective_function<Type>* obj)
   		 sigma_logpop, true).sum();
   }
 
-  vector<Type> population(MapVectorXt(proj.population.data(),
-				      proj.population.size()));
-  vector<Type> deaths(MapVectorXt(proj.deaths.data(),
-				  proj.deaths.size()));
-  vector<Type> births(MapVectorXt(proj.births.data(),
-				  proj.births.size()));
-  vector<Type> infants(MapVectorXt(proj.infants.data(),
-				   proj.infants.size()));
-  vector<Type> migrations(MapVectorXt(proj.migrations.data(),
-				      proj.migrations.size()));
-  REPORT(population);
-  REPORT(deaths);
-  REPORT(births);
-  REPORT(infants);
-  REPORT(migrations);
-  REPORT(sx);
-  REPORT(fx);
-  REPORT(gx);
+  DATA_INTEGER(calc_outputs);
 
+  if(calc_outputs) {
+    
+    vector<Type> population(MapVectorXt(proj.population.data(),
+					proj.population.size()));
+    vector<Type> cohort_deaths(MapVectorXt(proj.cohort_deaths.data(),
+					   proj.cohort_deaths.size()));
+    vector<Type> births(MapVectorXt(proj.births.data(),
+				    proj.births.size()));
+    vector<Type> infants(MapVectorXt(proj.infants.data(),
+				     proj.infants.size()));
+    vector<Type> migrations(MapVectorXt(proj.migrations.data(),
+					proj.migrations.size()));
+    REPORT(population);
+    REPORT(cohort_deaths);
+    REPORT(births);
+    REPORT(infants);
+    REPORT(migrations);
+    REPORT(sx);
+    REPORT(fx);
+    REPORT(gx);
+  }
+  
   return Type(nll);
 }
 

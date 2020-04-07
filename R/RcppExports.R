@@ -57,9 +57,9 @@ make_leslie_matrixR <- function(sx, fx, srb, age_span, fx_idx) {
 #' projection period, and `srb` is a vector of length number of projection 
 #' periods.
 #'
-#' The number of age groups in the deaths array are one greater than then number
-#' of age groups because deaths are counted separately for those ageing into
-#' the open ended age group and survivors in the open ended age group.
+#' The number of age groups in the cohort deaths array are one greater than the 
+#' number of age groups because deaths are counted separately for those ageing 
+#' into the open ended age group and survivors in the open ended age group.
 #'
 #' @examples
 #'

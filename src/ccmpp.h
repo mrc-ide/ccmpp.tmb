@@ -84,7 +84,7 @@ class PopulationProjection {
   const Array1XT srb;
     
   MatrixXXT population;
-  MatrixXXT deaths;
+  MatrixXXT cohort_deaths;
   MatrixXXT births;
   Eigen::Matrix<Type, 1, Eigen::Dynamic> infants;
   MatrixXXT migrations;
@@ -109,7 +109,7 @@ class PopulationProjection {
     gx{ gx },
     srb{ srb },
     population{ MatrixXXT(n_ages, n_steps + 1) },
-    deaths{ MatrixXXT(n_ages+1, n_steps) },
+    cohort_deaths{ MatrixXXT(n_ages+1, n_steps) },
     births{ MatrixXXT(n_fx, n_steps) },
     infants{ Eigen::Matrix<Type, 1, Eigen::Dynamic>(n_steps) },
     migrations{ MatrixXXT(n_ages, n_steps) }
@@ -118,6 +118,8 @@ class PopulationProjection {
     };
 
     void step_projection(int step);
+
+    MatrixXXT period_deaths();
   
 };
 
@@ -133,7 +135,7 @@ void PopulationProjection<Type>::step_projection(int step) {
   
   MapArrayXT population_t(population.col(step+1).data(), population.rows());
   MapArrayXT migrations_t(migrations.col(step).data(), migrations.rows());
-  MapArrayXT deaths_t(deaths.col(step).data(), deaths.rows());
+  MapArrayXT cohort_deaths_t(cohort_deaths.col(step).data(), cohort_deaths.rows());
   MapArrayXT births_t(births.col(step).data(), births.rows());
   MapArrayXT infants_t(infants.col(step).data(), infants.rows());
 
@@ -142,23 +144,37 @@ void PopulationProjection<Type>::step_projection(int step) {
   migrations_t = population_t * gx_t;
   population_t += 0.5 * migrations_t;
   
-  deaths_t.segment(1, n_ages) = population_t * (1.0 - sx_t.segment(1, n_ages));
+  cohort_deaths_t.segment(1, n_ages) = population_t * (1.0 - sx_t.segment(1, n_ages));
   births_t = 0.5 * age_span * fx_t * population_t.segment(fx_idx, n_fx);
 
-  Type open_age_survivors = population_t(n_ages-1) - deaths_t(n_ages);
+  Type open_age_survivors = population_t(n_ages-1) - cohort_deaths_t(n_ages);
   for(int age = n_ages-1; age > 0; age--) {
-    population_t(age) = population_t(age-1) - deaths_t(age);
+    population_t(age) = population_t(age-1) - cohort_deaths_t(age);
   }
   population_t(n_ages-1) += open_age_survivors;
   
   births_t += 0.5 * age_span * fx_t * population_t.segment(fx_idx, n_fx);
   infants_t = births_t.sum() / (1.0 + srb(step));
-  deaths_t(0) = infants_t(0) * (1.0 - sx_t(0));
-  population_t(0) = infants_t(0) - deaths_t(0);
+  cohort_deaths_t(0) = infants_t(0) * (1.0 - sx_t(0));
+  population_t(0) = infants_t(0) - cohort_deaths_t(0);
   
   population_t += 0.5 * migrations_t;
 }
 
+template <typename Type>
+Eigen::Matrix<Type, Eigen::Dynamic, Eigen::Dynamic> PopulationProjection<Type>::period_deaths() {
+
+  typedef Eigen::Matrix<Type, Eigen::Dynamic, Eigen::Dynamic> MatrixXXT;
+  
+  MatrixXXT period_deaths(0.5 * cohort_deaths.topRows(n_ages));
+  period_deaths += 0.5 * cohort_deaths.bottomRows(n_ages);
+  period_deaths.row(0) += 0.5 * cohort_deaths.row(0);
+  period_deaths.row(n_ages-1) += 0.5 * cohort_deaths.row(n_ages);
+
+  return period_deaths;
+}
+
+  
 template <typename Type>
 PopulationProjection<Type>
 ccmpp(const Eigen::Matrix<Type, Eigen::Dynamic, 1>& basepop,

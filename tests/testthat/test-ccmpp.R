@@ -41,27 +41,31 @@ test_that("population projection matches popReconstruct implementation", {
   
 })
 
-test_that("array-based and Leslie matrix population projection match", {
+test_that("projection outputs satisfy balancing equation", {
 
   data(burkina_faso_females, package = "popReconstruct")
   bff <- burkina.faso.females
 
-  popproj_leslie <- ccmpp_leslieR(basepop = as.numeric(bff$baseline.pop.counts),
-                                  sx = bff$survival.proportions,
-                                  fx = bff$fertility.rates[4:10, ],
-                                  gx = bff$migration.proportions,
-                                  srb = rep(1.05, ncol(bff$survival.proportions)),
-                                  age_span = 5,
-                                  fx_idx = 4)
+  bff_srb <- rep(1.05, ncol(bff$survival.proportions))
   
-  popproj <- ccmppR(basepop = as.numeric(bff$baseline.pop.counts),
-                    sx = bff$survival.proportions,
-                    fx = bff$fertility.rates[4:10, ],
-                    gx = bff$migration.proportions,
-                    srb = rep(1.05, ncol(bff$survival.proportions)),
-                    age_span = 5,
-                    fx_idx = 4)
-  
-  expect_equal(popproj_leslie, popproj$population)
+  proj <- ccmppR(basepop = as.numeric(bff$baseline.pop.counts),
+                 sx = bff$survival.proportions,
+                 fx = bff$fertility.rates[4:10, ],
+                 gx = bff$migration.proportions,
+                 srb = bff_srb,
+                 age_span = 5,
+                 fx_idx = 4)
+
+  n_periods <- ncol(bff$survival.proportions)
+
+  check_proj <- colSums(proj$population[ , -(n_periods+1)]) +
+    colSums(proj$infants) + colSums(proj$migrations) - colSums(proj$cohort_deaths)
+
+  expect_equal(colSums(proj$population[ , -1]), check_proj)
+    
+  expect_equal(colSums(proj$cohort_deaths),
+               colSums(proj$period_deaths))
+
+  expect_equal(colSums(proj$births) / (1 + bff_srb), colSums(proj$infants))
   
 })

@@ -40,9 +40,9 @@ Arguments `sx`, `fx`, and `gx` are matrices with one column for each
 projection period, and `srb` is a vector of length number of projection 
 periods.
 
-The number of age groups in the deaths array are one greater than then number
-of age groups because deaths are counted separately for those ageing into
-the open ended age group and survivors in the open ended age group.
+The number of age groups in the cohort deaths array are one greater than the 
+number of age groups because deaths are counted separately for those ageing 
+into the open ended age group and survivors in the open ended age group.
 }
 \examples{
 
