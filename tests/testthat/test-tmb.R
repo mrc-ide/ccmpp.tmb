@@ -10,7 +10,7 @@ test_that("TMB objective function returns results", {
   expect_true(is.finite(obj$fn())) 
   expect_equal(matrix(obj$report(unlist(bff_par))$population, nrow = length(bff_basepop)),
                ccmppR(bff_basepop, bff_sx, bff_fx, bff_gx,
-                      bff_data$srb, bff_data$age_span, bff_data$fx_idx)$population)
+                      bff_data$srb, bff_data$interval, bff_data$fx_idx)$population)
   
 })
 

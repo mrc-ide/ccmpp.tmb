@@ -5,9 +5,9 @@
 \alias{ccmpp_leslieR}
 \title{Simulate cohort component population projection}
 \usage{
-ccmppR(basepop, sx, fx, gx, srb, age_span, fx_idx)
+ccmppR(basepop, sx, fx, gx, srb, interval, fx_idx)
 
-ccmpp_leslieR(basepop, sx, fx, gx, srb, age_span, fx_idx)
+ccmpp_leslieR(basepop, sx, fx, gx, srb, interval, fx_idx)
 }
 \arguments{
 \item{basepop}{vector of baseline population size.}
@@ -20,7 +20,7 @@ ccmpp_leslieR(basepop, sx, fx, gx, srb, age_span, fx_idx)
 
 \item{srb}{a vector of sex ratio at birth.}
 
-\item{age_span}{the interval for age and projection time step.}
+\item{interval}{the interval for age and projection time step.}
 
 \item{fx_idx}{first in}
 }
@@ -57,10 +57,10 @@ bf_srb <- rep(1.05, ncol(burkina.faso.females$survival.proportions))
 
 pop_leslie <- ccmpp_leslieR(basepop = bf_basepop, sx = bf_sx, fx = bf_fx,
                             gx = bf_gx, srb = bf_srb, 
-                            age_span = 5, fx_idx = 4)
+                            interval = 5, fx_idx = 4)
 pop_proj <- ccmppR(basepop = bf_basepop, sx = bf_sx, fx = bf_fx,
                    gx = bf_gx, srb = bf_srb, 
-                   age_span = 5, fx_idx = 4)
+                   interval = 5, fx_idx = 4)
 
 all(pop_leslie == pop_proj$population)
 

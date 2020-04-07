@@ -47,7 +47,7 @@ data(burkina_faso_females)
 make_leslie_matrixR(sx = burkina.faso.females$survival.proportions[,1],
                     fx = burkina.faso.females$fertility.rates[4:10, 1],
                     srb = 1.05,
-                    age_span = 5,
+                    interval = 5,
                     fx_idx = 4)
 #> 17 x 17 sparse Matrix of class "dgCMatrix"
 #>                                                                                                                                                  
@@ -96,7 +96,7 @@ pop_proj <- ccmppR(basepop = as.numeric(burkina.faso.females$baseline.pop.counts
                    fx = burkina.faso.females$fertility.rates[4:10, ],
                    gx = burkina.faso.females$migration.proportions,
                    srb = rep(1.05, ncol(burkina.faso.females$survival.proportions)),
-                   age_span = 5,
+                   interval = 5,
                    fx_idx = 4)
 pop_proj$population[ , c(1, 2, 10)]
 #>         [,1]       [,2]       [,3]
@@ -147,7 +147,7 @@ data <- list(log_basepop_mean = log_basepop_mean,
              log_fx_mean = log_fx_mean,
              gx_mean = gx_mean,
              srb = rep(1.05, ncol(sx_init)),
-             age_span = 5,
+             interval = 5,
              n_steps = ncol(sx_init),
              fx_idx = 4L,
              n_fx = 7L,
@@ -243,7 +243,8 @@ colnames(fit$sample$migrations) <- 1:ncol(fit$sample$migrations)
 colnames(fit$sample$fx) <- 1:ncol(fit$sample$fx)
 
 init_pop_mat <- ccmpp_leslieR(basepop_init, sx_init, fx_init, gx_init,
-                              srb = rep(1.05, ncol(sx_init)), age_span = 5, fx_idx = 4)
+                              srb = rep(1.05, ncol(sx_init)),
+                              interval = 5, fx_idx = 4)
 
 df <- crossing(year = seq(1960, 2015, 5),
                sex = "female",

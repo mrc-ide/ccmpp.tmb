@@ -23,7 +23,7 @@ Type ccmpp_tmb(objective_function<Type>* obj)
   DATA_VECTOR(log_fx_mean);
   DATA_VECTOR(gx_mean);
   DATA_VECTOR(srb);
-  DATA_SCALAR(age_span);
+  DATA_SCALAR(interval);
   DATA_INTEGER(n_steps);
   DATA_INTEGER(fx_idx);
   DATA_INTEGER(n_fx);
@@ -78,7 +78,7 @@ Type ccmpp_tmb(objective_function<Type>* obj)
 
   // population projection
   PopulationProjection<Type> proj(ccmpp<Type>(basepop, sx_mat, fx_mat, gx_mat,
-					      srb, age_span, fx_idx-1));
+					      srb, interval, fx_idx-1));
   
   // likelihood for log census counts
   for(int i = 0; i < census_year_idx.size(); i++) {

@@ -7,7 +7,7 @@
 //' @param sx a vector of survivorship probabilities.
 //' @param fx a vector of fertility rates, only amongst fertile ages.
 //' @param srb sex ratio at birth.
-//' @param age_span the interval for age and projection time step.
+//' @param interval the interval for age and projection time step.
 //' @param fx_idx first in
 //'
 //' @return A sparse matrix representation of a Leslie matrix.
@@ -26,7 +26,7 @@
 //' make_leslie_matrixR(sx = burkina.faso.females$survival.proportions[,1],
 //'                     fx = burkina.faso.females$fertility.rates[4:10, 1],
 //'                     srb = 1.05,
-//'                     age_span = 5,
+//'                     interval = 5,
 //'                     fx_idx = 4)
 //'
 //' @importClassesFrom Matrix dgCMatrix
@@ -36,10 +36,10 @@ Eigen::SparseMatrix<double>
 make_leslie_matrixR(const Eigen::Map<Eigen::ArrayXd> sx,
                     const Eigen::Map<Eigen::ArrayXd> fx,
                     double srb,
-                    double age_span,
+                    double interval,
                     int fx_idx) {
   
-  return make_leslie_matrix<double>(sx, fx, srb, age_span, fx_idx - 1);
+  return make_leslie_matrix<double>(sx, fx, srb, interval, fx_idx - 1);
 }
 
 
@@ -50,7 +50,7 @@ make_leslie_matrixR(const Eigen::Map<Eigen::ArrayXd> sx,
 //' @param fx a matrix of fertility rates, only amongst fertile ages.
 //' @param gx a matrix of proportion of migrants during projection period.
 //' @param srb a vector of sex ratio at birth.
-//' @param age_span the interval for age and projection time step.
+//' @param interval the interval for age and projection time step.
 //' @param fx_idx first in
 //'
 //' @return
@@ -83,10 +83,10 @@ make_leslie_matrixR(const Eigen::Map<Eigen::ArrayXd> sx,
 //'
 //' pop_leslie <- ccmpp_leslieR(basepop = bf_basepop, sx = bf_sx, fx = bf_fx,
 //'                             gx = bf_gx, srb = bf_srb, 
-//'                             age_span = 5, fx_idx = 4)
+//'                             interval = 5, fx_idx = 4)
 //' pop_proj <- ccmppR(basepop = bf_basepop, sx = bf_sx, fx = bf_fx,
 //'                    gx = bf_gx, srb = bf_srb, 
-//'                    age_span = 5, fx_idx = 4)
+//'                    interval = 5, fx_idx = 4)
 //' 
 //' all(pop_leslie == pop_proj$population)
 //'
@@ -98,10 +98,10 @@ ccmppR(const Eigen::Map<Eigen::VectorXd> basepop,
        const Eigen::Map<Eigen::MatrixXd> fx,
        const Eigen::Map<Eigen::MatrixXd> gx,
        const Eigen::Map<Eigen::VectorXd> srb,
-       double age_span,
+       double interval,
        int fx_idx) {
 
-  PopulationProjection<double> proj(ccmpp<double>(basepop, sx, fx, gx, srb, age_span, fx_idx - 1));
+  PopulationProjection<double> proj(ccmpp<double>(basepop, sx, fx, gx, srb, interval, fx_idx - 1));
 
   // !! NOTE: is this copying memory?
   return Rcpp::List::create(Rcpp::Named("population") = proj.population,
@@ -121,8 +121,8 @@ ccmpp_leslieR(const Eigen::Map<Eigen::VectorXd> basepop,
 	      const Eigen::Map<Eigen::MatrixXd> fx,
 	      const Eigen::Map<Eigen::MatrixXd> gx,
 	      const Eigen::Map<Eigen::VectorXd> srb,
-	      double age_span,
+	      double interval,
 	      int fx_idx) {
   
-  return ccmpp_leslie<double>(basepop, sx, fx, gx, srb, age_span, fx_idx - 1);
+  return ccmpp_leslie<double>(basepop, sx, fx, gx, srb, interval, fx_idx - 1);
 }

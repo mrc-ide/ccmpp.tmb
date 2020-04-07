@@ -4,7 +4,7 @@
 \alias{make_leslie_matrixR}
 \title{Construct a sparse Leslie matrix}
 \usage{
-make_leslie_matrixR(sx, fx, srb, age_span, fx_idx)
+make_leslie_matrixR(sx, fx, srb, interval, fx_idx)
 }
 \arguments{
 \item{sx}{a vector of survivorship probabilities.}
@@ -13,7 +13,7 @@ make_leslie_matrixR(sx, fx, srb, age_span, fx_idx)
 
 \item{srb}{sex ratio at birth.}
 
-\item{age_span}{the interval for age and projection time step.}
+\item{interval}{the interval for age and projection time step.}
 
 \item{fx_idx}{first in}
 }
@@ -37,7 +37,7 @@ data(burkina_faso_females)
 make_leslie_matrixR(sx = burkina.faso.females$survival.proportions[,1],
                     fx = burkina.faso.females$fertility.rates[4:10, 1],
                     srb = 1.05,
-                    age_span = 5,
+                    interval = 5,
                     fx_idx = 4)
 
 }

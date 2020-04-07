@@ -10,10 +10,10 @@ Eigen::SparseMatrix<Type>
 make_leslie_matrix(const Eigen::Array<Type, Eigen::Dynamic, 1>& sx,
                    const Eigen::Array<Type, Eigen::Dynamic, 1>& fx,
                    const Type srb,
-                   const Type age_span,
+                   const Type interval,
                    const int fx_idx) {
   
-  Type fert_k = sx[0] * 0.5 * age_span / (1.0 + srb);
+  Type fert_k = sx[0] * 0.5 * interval / (1.0 + srb);
 
   int fxd = fx.rows();
   Eigen::Array<Type, Eigen::Dynamic, 1> fert_leslie(fxd + 1);
@@ -46,7 +46,7 @@ ccmpp_leslie(const Eigen::Matrix<Type, Eigen::Dynamic, 1>& basepop,
 	     const Eigen::Array<Type, Eigen::Dynamic, Eigen::Dynamic>& fx,
 	     const Eigen::Array<Type, Eigen::Dynamic, Eigen::Dynamic>& gx,
 	     const Eigen::Array<Type, Eigen::Dynamic, 1>& srb,
-	     const Type age_span,
+	     const Type interval,
 	     const int fx_idx) {
 
   int nsteps(sx.cols());
@@ -56,7 +56,7 @@ ccmpp_leslie(const Eigen::Matrix<Type, Eigen::Dynamic, 1>& basepop,
   for(int step = 0; step < nsteps; step++) {
     Eigen::Matrix<Type, Eigen::Dynamic, 1> migrants(population.col(step).array() *
 						    gx.col(step));
-    Eigen::SparseMatrix<Type> leslie(make_leslie_matrix<Type>(sx.col(step), fx.col(step), srb[step], age_span, fx_idx));
+    Eigen::SparseMatrix<Type> leslie(make_leslie_matrix<Type>(sx.col(step), fx.col(step), srb[step], interval, fx_idx));
     population.col(step + 1) = leslie * (population.col(step) + 0.5 * migrants) + 0.5 * migrants;
   }
 
@@ -76,7 +76,7 @@ class PopulationProjection {
   const int n_steps;
   const int n_fx;    // number of age groups eligible for fertility
   const int fx_idx;  // first age index eligible for fertility
-  const Type age_span;
+  const Type interval;
 
   const ArrayXXT sx;
   const ArrayXXT fx;
@@ -93,7 +93,7 @@ class PopulationProjection {
 		      const int n_steps,
 		      const int n_fx,
 		      const int fx_idx,
-		      const Type age_span,
+		      const Type interval,
 		      const Eigen::Matrix<Type, Eigen::Dynamic, 1>& basepop,
 		      const Eigen::Array<Type, Eigen::Dynamic, Eigen::Dynamic>& sx,
 		      const Eigen::Array<Type, Eigen::Dynamic, Eigen::Dynamic>& fx,
@@ -103,7 +103,7 @@ class PopulationProjection {
     n_steps{ n_steps },
     n_fx{ n_fx },
     fx_idx{ fx_idx },
-    age_span{ age_span },
+    interval{ interval },
     sx{ sx },
     fx{ fx },
     gx{ gx },
@@ -145,7 +145,7 @@ void PopulationProjection<Type>::step_projection(int step) {
   population_t += 0.5 * migrations_t;
   
   cohort_deaths_t.segment(1, n_ages) = population_t * (1.0 - sx_t.segment(1, n_ages));
-  births_t = 0.5 * age_span * fx_t * population_t.segment(fx_idx, n_fx);
+  births_t = 0.5 * interval * fx_t * population_t.segment(fx_idx, n_fx);
 
   Type open_age_survivors = population_t(n_ages-1) - cohort_deaths_t(n_ages);
   for(int age = n_ages-1; age > 0; age--) {
@@ -153,7 +153,7 @@ void PopulationProjection<Type>::step_projection(int step) {
   }
   population_t(n_ages-1) += open_age_survivors;
   
-  births_t += 0.5 * age_span * fx_t * population_t.segment(fx_idx, n_fx);
+  births_t += 0.5 * interval * fx_t * population_t.segment(fx_idx, n_fx);
   infants_t = births_t.sum() / (1.0 + srb(step));
   cohort_deaths_t(0) = infants_t(0) * (1.0 - sx_t(0));
   population_t(0) = infants_t(0) - cohort_deaths_t(0);
@@ -182,14 +182,14 @@ ccmpp(const Eigen::Matrix<Type, Eigen::Dynamic, 1>& basepop,
       const Eigen::Array<Type, Eigen::Dynamic, Eigen::Dynamic>& fx,
       const Eigen::Array<Type, Eigen::Dynamic, Eigen::Dynamic>& gx,
       const Eigen::Array<Type, Eigen::Dynamic, 1>& srb,
-      const Type age_span,
+      const Type interval,
       const int fx_idx) {
 
   int n_steps(sx.cols());
   int n_ages(basepop.rows());
   int n_fx(fx.rows());
 
-  PopulationProjection<Type> proj(n_ages, n_steps, n_fx, fx_idx, age_span,
+  PopulationProjection<Type> proj(n_ages, n_steps, n_fx, fx_idx, interval,
 				  basepop, sx, fx, gx, srb);
 
   for(int step = 0; step < n_steps; step++) {

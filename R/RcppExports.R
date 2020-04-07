@@ -6,7 +6,7 @@
 #' @param sx a vector of survivorship probabilities.
 #' @param fx a vector of fertility rates, only amongst fertile ages.
 #' @param srb sex ratio at birth.
-#' @param age_span the interval for age and projection time step.
+#' @param interval the interval for age and projection time step.
 #' @param fx_idx first in
 #'
 #' @return A sparse matrix representation of a Leslie matrix.
@@ -25,13 +25,13 @@
 #' make_leslie_matrixR(sx = burkina.faso.females$survival.proportions[,1],
 #'                     fx = burkina.faso.females$fertility.rates[4:10, 1],
 #'                     srb = 1.05,
-#'                     age_span = 5,
+#'                     interval = 5,
 #'                     fx_idx = 4)
 #'
 #' @importClassesFrom Matrix dgCMatrix
 #' @export
-make_leslie_matrixR <- function(sx, fx, srb, age_span, fx_idx) {
-    .Call(`_leapfrog_make_leslie_matrixR`, sx, fx, srb, age_span, fx_idx)
+make_leslie_matrixR <- function(sx, fx, srb, interval, fx_idx) {
+    .Call(`_leapfrog_make_leslie_matrixR`, sx, fx, srb, interval, fx_idx)
 }
 
 #' Simulate cohort component population projection
@@ -41,7 +41,7 @@ make_leslie_matrixR <- function(sx, fx, srb, age_span, fx_idx) {
 #' @param fx a matrix of fertility rates, only amongst fertile ages.
 #' @param gx a matrix of proportion of migrants during projection period.
 #' @param srb a vector of sex ratio at birth.
-#' @param age_span the interval for age and projection time step.
+#' @param interval the interval for age and projection time step.
 #' @param fx_idx first in
 #'
 #' @return
@@ -74,21 +74,21 @@ make_leslie_matrixR <- function(sx, fx, srb, age_span, fx_idx) {
 #'
 #' pop_leslie <- ccmpp_leslieR(basepop = bf_basepop, sx = bf_sx, fx = bf_fx,
 #'                             gx = bf_gx, srb = bf_srb, 
-#'                             age_span = 5, fx_idx = 4)
+#'                             interval = 5, fx_idx = 4)
 #' pop_proj <- ccmppR(basepop = bf_basepop, sx = bf_sx, fx = bf_fx,
 #'                    gx = bf_gx, srb = bf_srb, 
-#'                    age_span = 5, fx_idx = 4)
+#'                    interval = 5, fx_idx = 4)
 #' 
 #' all(pop_leslie == pop_proj$population)
 #'
 #' @export
-ccmppR <- function(basepop, sx, fx, gx, srb, age_span, fx_idx) {
-    .Call(`_leapfrog_ccmppR`, basepop, sx, fx, gx, srb, age_span, fx_idx)
+ccmppR <- function(basepop, sx, fx, gx, srb, interval, fx_idx) {
+    .Call(`_leapfrog_ccmppR`, basepop, sx, fx, gx, srb, interval, fx_idx)
 }
 
 #' @rdname ccmppR
 #' @export
-ccmpp_leslieR <- function(basepop, sx, fx, gx, srb, age_span, fx_idx) {
-    .Call(`_leapfrog_ccmpp_leslieR`, basepop, sx, fx, gx, srb, age_span, fx_idx)
+ccmpp_leslieR <- function(basepop, sx, fx, gx, srb, interval, fx_idx) {
+    .Call(`_leapfrog_ccmpp_leslieR`, basepop, sx, fx, gx, srb, interval, fx_idx)
 }
 
