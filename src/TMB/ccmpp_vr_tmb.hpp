@@ -1,5 +1,5 @@
-#ifndef CCMPP_TMB_HPP
-#define CCMPP_TMB_HPP
+#ifndef CCMPP_VR_TMB_HPP
+#define CCMPP_VR_TMB_HPP
 
 #undef TMB_OBJECTIVE_PTR
 #define TMB_OBJECTIVE_PTR obj
@@ -7,11 +7,11 @@
 #include "../ccmpp.h"
 
 template<class Type>
-Type ccmpp_tmb(objective_function<Type>* obj)
+Type ccmpp_vr_tmb(objective_function<Type>* obj)
 {
+
+  std::cout << "ccmpp_vr_tmb" << std::endl;
   
-  std::cout << "ccmpp_tmb" << std::endl;
-    
   using Eigen::Matrix;
   using Eigen::Map;
   using Eigen::Dynamic;
@@ -34,6 +34,12 @@ Type ccmpp_tmb(objective_function<Type>* obj)
   // census data
   DATA_MATRIX(census_log_pop);
   DATA_IVECTOR(census_year_idx);
+
+  // deaths data
+  DATA_MATRIX(deaths_obs);
+
+  // births data
+  DATA_MATRIX(births_obs);
 
     
   Type nll(0.0);
@@ -90,6 +96,25 @@ Type ccmpp_tmb(objective_function<Type>* obj)
   		 sigma_logpop, true).sum();
   }
 
+
+  MatrixXXt proj_period_deaths(proj.period_deaths());
+  vector<Type> period_deaths(MapVectorXt(proj_period_deaths.data(),
+					 proj_period_deaths.size()));
+  vector<Type> births(MapVectorXt(proj.births.data(),
+				  proj.births.size()));
+
+  vector<Type> deaths_obs_v(MapVectorXt(deaths_obs.data(),
+					deaths_obs.size()));
+  vector<Type> births_obs_v(MapVectorXt(births_obs.data(), births_obs.size()));
+  
+  
+  // likelihood for deaths
+  nll -= dpois(deaths_obs_v, period_deaths, true).sum();
+
+  // likelihood for births
+  nll -= dpois(births_obs_v, births, true).sum();
+
+
   DATA_INTEGER(calc_outputs);
 
   if(calc_outputs) {
@@ -98,13 +123,6 @@ Type ccmpp_tmb(objective_function<Type>* obj)
 					proj.population.size()));
     vector<Type> cohort_deaths(MapVectorXt(proj.cohort_deaths.data(),
 					   proj.cohort_deaths.size()));
-
-    MatrixXXt proj_period_deaths(proj.period_deaths());
-    vector<Type> period_deaths(MapVectorXt(proj_period_deaths.data(),
-					   proj_period_deaths.size()));
-
-    vector<Type> births(MapVectorXt(proj.births.data(),
-				    proj.births.size()));
     vector<Type> infants(MapVectorXt(proj.infants.data(),
 				     proj.infants.size()));
     vector<Type> migrations(MapVectorXt(proj.migrations.data(),

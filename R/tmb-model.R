@@ -51,8 +51,12 @@ fit_tmb <- function(tmb_input,
 
   ## stopifnot(inherits(tmb_input, "tmb_input"))
 
+  if(is.null(tmb_input$model))
+    tmb_input$model <- "ccmpp_tmb"
+
   obj <- make_tmb_obj(data = tmb_input$data,
                       par = tmb_input$par_init,
+                      model = tmb_input$model,
                       inner_verbose = inner_verbose,
                       calc_outputs = 0L)
 
@@ -78,6 +82,7 @@ fit_tmb <- function(tmb_input,
 
   objout <- make_tmb_obj(tmb_input$data,
                          tmb_input$par_init,
+                         model = tmb_input$model,
                          inner_verbose = inner_verbose,
                          calc_outputs = 1L)
   f$mode <- objout$report(f$par.full)

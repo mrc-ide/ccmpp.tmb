@@ -3,12 +3,15 @@
 #define TMB_LIB_INIT R_init_leapfrog_TMBExports
 #include <TMB.hpp>
 #include "ccmpp_tmb.hpp"
+#include "ccmpp_vr_tmb.hpp"
 
 template<class Type>
 Type objective_function<Type>::operator() () {
   DATA_STRING(model);
   if(model == "ccmpp_tmb") {
     return ccmpp_tmb(this);
+  } else if(model == "ccmpp_vr_tmb") {
+    return ccmpp_vr_tmb(this);
   } else {
     error("Unknown model.");
   }
