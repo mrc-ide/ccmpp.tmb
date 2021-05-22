@@ -5,12 +5,9 @@
 
 <!-- badges: start -->
 
-[![Travis build
-status](https://travis-ci.org/mrc-ide/leapfrog.svg?branch=master)](https://travis-ci.org/mrc-ide/leapfrog)
-[![AppVeyor build
-status](https://ci.appveyor.com/api/projects/status/github/mrc-ide/leapfrog?branch=master&svg=true)](https://ci.appveyor.com/project/mrc-ide/leapfrog)
 [![Codecov test
 coverage](https://codecov.io/gh/mrc-ide/leapfrog/branch/master/graph/badge.svg)](https://codecov.io/gh/mrc-ide/leapfrog?branch=master)
+[![R-CMD-check](https://github.com/mrc-ide/leapfrog/workflows/R-CMD-check/badge.svg)](https://github.com/mrc-ide/leapfrog/actions)
 <!-- badges: end -->
 
 Leapfrog is a multistate population projection model for demographic and
@@ -37,7 +34,6 @@ Construct a sparse Leslie matrix:
 
 ``` r
 library(tidyverse)
-#> Warning: package 'tibble' was built under R version 3.6.2
 library(leapfrog)
 library(popReconstruct)
 #> Loading required package: coda
@@ -269,6 +265,7 @@ agepop <- df %>%
             mean = mean(value),
             lower = quantile(value, 0.025),
             upper = quantile(value, 0.975))
+#> `summarise()` has grouped output by 'year', 'sex'. You can override using the `.groups` argument.
 
 totalpop <- df %>%
   group_by(year, sample) %>%
@@ -281,6 +278,7 @@ totalpop <- df %>%
             mean = mean(value),
             lower = quantile(value, 0.025),
             upper = quantile(value, 0.975))
+#> `summarise()` has grouped output by 'year'. You can override using the `.groups` argument.
 ```
 
 ``` r
@@ -336,6 +334,7 @@ tfr <- asfr %>%
          mean = mean(value),
          lower = quantile(value, 0.025),
          upper = quantile(value, 0.975))
+#> `summarise()` has grouped output by 'year'. You can override using the `.groups` argument.
 
 ggplot(tfr, aes(year, mean, ymin = lower, ymax = upper)) +
   geom_ribbon(alpha = 0.2) +
@@ -367,6 +366,7 @@ total_migrations <- migrations %>%
          mean = mean(value),
          lower = quantile(value, 0.025),
          upper = quantile(value, 0.975))
+#> `summarise()` has grouped output by 'year'. You can override using the `.groups` argument.
 
 ggplot(total_migrations, aes(year, mean, ymin = lower, ymax = upper)) +
   geom_ribbon(alpha = 0.2) +
