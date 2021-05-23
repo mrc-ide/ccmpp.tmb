@@ -17,8 +17,7 @@ options(tidyverse.quiet = TRUE)
 # leapfrog
 
 <!-- badges: start -->
-[![Travis build status](https://travis-ci.org/mrc-ide/leapfrog.svg?branch=master)](https://travis-ci.org/mrc-ide/leapfrog)
-[![AppVeyor build status](https://ci.appveyor.com/api/projects/status/github/mrc-ide/leapfrog?branch=master&svg=true)](https://ci.appveyor.com/project/mrc-ide/leapfrog)
+[![R-CMD-check](https://github.com/mrc-ide/leapfrog/workflows/R-CMD-check/badge.svg)](https://github.com/mrc-ide/leapfrog/actions)
 [![Codecov test coverage](https://codecov.io/gh/mrc-ide/leapfrog/branch/master/graph/badge.svg)](https://codecov.io/gh/mrc-ide/leapfrog?branch=master)
 <!-- badges: end -->
 
