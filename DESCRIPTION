@@ -3,7 +3,7 @@ Title: Cohort Component Population Projection and Reconstruction in TMB
 Version: 0.1.0
 Authors@R: 
     person(given = "Jeffrey",
-           family = "Last",
+           family = "Eaton",
            role = c("aut", "cre"),
            email = "jeffrey.eaton@imperial.ac.uk",
            comment = c(ORCID = "0000-0001-7728-728X"))
