@@ -11,7 +11,7 @@ coverage](https://codecov.io/gh/mrc-ide/ccmpp.tmb/branch/master/graph/badge.svg)
 <!-- badges: end -->
 
 `ccmpp.tmb` is an implementation of a cohort component model of
-population projection (CCMPP) and the Wheldon *et al.*’s [Bayesian
+population projection (CCMPP) and Wheldon *et al.*’s [Bayesian
 Population
 Reconstruction](https://www.tandfonline.com/doi/full/10.1080/01621459.2012.737729)
 in the R package [Template Model Builder
@@ -41,7 +41,6 @@ Construct a sparse Leslie matrix:
 library(tidyverse)
 library(ccmpp.tmb)
 library(popReconstruct)
-#> Loading required package: coda
 
 data(burkina_faso_females)
 

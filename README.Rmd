@@ -21,7 +21,7 @@ options(tidyverse.quiet = TRUE)
 [![Codecov test coverage](https://codecov.io/gh/mrc-ide/ccmpp.tmb/branch/master/graph/badge.svg)](https://codecov.io/gh/mrc-ide/ccmpp.tmb?branch=master)
 <!-- badges: end -->
 
-`ccmpp.tmb` is an implementation of a cohort component model of population projection (CCMPP) and the Wheldon _et al._'s [Bayesian Population Reconstruction](https://www.tandfonline.com/doi/full/10.1080/01621459.2012.737729) in the R package [Template Model Builder (TMB)](https://kaskr.github.io/adcomp/_book/Introduction.html).
+`ccmpp.tmb` is an implementation of a cohort component model of population projection (CCMPP) and Wheldon _et al._'s [Bayesian Population Reconstruction](https://www.tandfonline.com/doi/full/10.1080/01621459.2012.737729) in the R package [Template Model Builder (TMB)](https://kaskr.github.io/adcomp/_book/Introduction.html).
 
 The package was created to explore the tractability of implementing Bayesian Population Reconstruction in TMB and prototype ideas for structuring integration of simulation models as templated C++ for flexible integration into TMB models and callable R functions with [Rcpp](https://www.rcpp.org/) wrappers.
 
