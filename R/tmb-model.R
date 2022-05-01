@@ -24,7 +24,7 @@ make_tmb_obj <- function(data,
                                  
   obj <- TMB::MakeADFun(data = data,
                         parameters = par,
-                        DLL = "leapfrog_TMBExports",
+                        DLL = "ccmpp.tmb_TMBExports",
                         silent = !inner_verbose,
                         random = c("log_basepop", "logit_sx", "log_fx", "gx"))
   class(obj) <- "tmb_obj"
@@ -83,7 +83,7 @@ fit_tmb <- function(tmb_input,
   f$mode <- objout$report(f$par.full)
     
   val <- c(f, obj = list(objout))
-  class(val) <- "leapfrog_fit"
+  class(val) <- "ccmpp_fit"
 
   val
 }
@@ -123,7 +123,7 @@ sample_tmb <- function(fit, nsample = 1000, rng_seed = NULL,
     set.seed(rng_seed)
   }
   
-  stopifnot(methods::is(fit, "leapfrog_fit"))
+  stopifnot(methods::is(fit, "ccmpp_fit"))
   stopifnot(nsample > 1)
 
   if (!random_only) {

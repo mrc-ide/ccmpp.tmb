@@ -6,9 +6,14 @@
 
 using namespace Rcpp;
 
+#ifdef RCPP_USE_GLOBAL_ROSTREAM
+Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
+Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
+#endif
+
 // make_leslie_matrixR
 Eigen::SparseMatrix<double> make_leslie_matrixR(const Eigen::Map<Eigen::ArrayXd> sx, const Eigen::Map<Eigen::ArrayXd> fx, double srb, double age_span, int fx_idx);
-RcppExport SEXP _leapfrog_make_leslie_matrixR(SEXP sxSEXP, SEXP fxSEXP, SEXP srbSEXP, SEXP age_spanSEXP, SEXP fx_idxSEXP) {
+RcppExport SEXP _ccmpp_tmb_make_leslie_matrixR(SEXP sxSEXP, SEXP fxSEXP, SEXP srbSEXP, SEXP age_spanSEXP, SEXP fx_idxSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -23,7 +28,7 @@ END_RCPP
 }
 // ccmppR
 Rcpp::List ccmppR(const Eigen::Map<Eigen::VectorXd> basepop, const Eigen::Map<Eigen::MatrixXd> sx, const Eigen::Map<Eigen::MatrixXd> fx, const Eigen::Map<Eigen::MatrixXd> gx, const Eigen::Map<Eigen::VectorXd> srb, double age_span, int fx_idx);
-RcppExport SEXP _leapfrog_ccmppR(SEXP basepopSEXP, SEXP sxSEXP, SEXP fxSEXP, SEXP gxSEXP, SEXP srbSEXP, SEXP age_spanSEXP, SEXP fx_idxSEXP) {
+RcppExport SEXP _ccmpp_tmb_ccmppR(SEXP basepopSEXP, SEXP sxSEXP, SEXP fxSEXP, SEXP gxSEXP, SEXP srbSEXP, SEXP age_spanSEXP, SEXP fx_idxSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -40,7 +45,7 @@ END_RCPP
 }
 // ccmpp_leslieR
 Eigen::MatrixXd ccmpp_leslieR(const Eigen::Map<Eigen::VectorXd> basepop, const Eigen::Map<Eigen::MatrixXd> sx, const Eigen::Map<Eigen::MatrixXd> fx, const Eigen::Map<Eigen::MatrixXd> gx, const Eigen::Map<Eigen::VectorXd> srb, double age_span, int fx_idx);
-RcppExport SEXP _leapfrog_ccmpp_leslieR(SEXP basepopSEXP, SEXP sxSEXP, SEXP fxSEXP, SEXP gxSEXP, SEXP srbSEXP, SEXP age_spanSEXP, SEXP fx_idxSEXP) {
+RcppExport SEXP _ccmpp_tmb_ccmpp_leslieR(SEXP basepopSEXP, SEXP sxSEXP, SEXP fxSEXP, SEXP gxSEXP, SEXP srbSEXP, SEXP age_spanSEXP, SEXP fx_idxSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -57,13 +62,13 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_leapfrog_make_leslie_matrixR", (DL_FUNC) &_leapfrog_make_leslie_matrixR, 5},
-    {"_leapfrog_ccmppR", (DL_FUNC) &_leapfrog_ccmppR, 7},
-    {"_leapfrog_ccmpp_leslieR", (DL_FUNC) &_leapfrog_ccmpp_leslieR, 7},
+    {"_ccmpp_tmb_make_leslie_matrixR", (DL_FUNC) &_ccmpp_tmb_make_leslie_matrixR, 5},
+    {"_ccmpp_tmb_ccmppR", (DL_FUNC) &_ccmpp_tmb_ccmppR, 7},
+    {"_ccmpp_tmb_ccmpp_leslieR", (DL_FUNC) &_ccmpp_tmb_ccmpp_leslieR, 7},
     {NULL, NULL, 0}
 };
 
-RcppExport void R_init_leapfrog(DllInfo *dll) {
+RcppExport void R_init_ccmpp_tmb(DllInfo *dll) {
     R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
     R_useDynamicSymbols(dll, FALSE);
 }

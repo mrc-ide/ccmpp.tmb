@@ -1,17 +1,17 @@
-Package: leapfrog
-Title: Multistate Population Projection Model for Demographic and HIV Estimation
-Version: 0.0.0.9001
+Package: ccmpp.tmb
+Title: Cohort Component Population Projection and Reconstruction in TMB
+Version: 0.1.0
 Authors@R: 
     person(given = "Jeffrey",
            family = "Last",
            role = c("aut", "cre"),
            email = "jeffrey.eaton@imperial.ac.uk",
            comment = c(ORCID = "0000-0001-7728-728X"))
-Description: Leapfrog is a multistate population projection model for estimating population, demographic indicators, and HIV epidemic. The model combines a standard cohort component model of population projection (CCMPP) with a multistate model for HIV infection, disease progression, and treatment. Statistical tools are implemented for joint inference from multiple demographic and epidemiologic data sources.
+Description: Leapfrog is a multistate population projection model for estimating population and demographic indicators. The model implements a cohort component model of population projection (CCMPP) and statistical fitting of Wheldon et al.'s Bayesian Population Reconstruction framework in the R package Template Model Builder (TMB).
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.0.2
+RoxygenNote: 7.1.2
 LinkingTo: 
     Rcpp,
     RcppEigen,
@@ -25,4 +25,3 @@ Suggests:
     covr,
     popReconstruct,
     testthat (>= 2.1.0)
-

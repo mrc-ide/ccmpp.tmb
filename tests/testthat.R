@@ -1,4 +1,4 @@
 library(testthat)
-library(leapfrog)
+library(ccmpp.tmb)
 
-test_check("leapfrog")
+test_check("ccmpp.tmb")
