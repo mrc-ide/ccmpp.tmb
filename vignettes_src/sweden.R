@@ -16,7 +16,7 @@ knitr::opts_chunk$set(
 ##+ setup
 devtools::load_all()
 
-## library(leapfrog)
+## library(ccmpp.tmb)
 library(dplyr)
 library(tidyr)
 library(forcats)
@@ -165,7 +165,7 @@ par_opt <- obj$env$parList()
 
 obj <- TMB::MakeADFun(data = data,
                       parameters = par_opt,
-                      DLL = "leapfrog_TMBExports",
+                      DLL = "ccmpp.tmb_TMBExports",
                       silent = !inner_verbose,
                       random = c("log_basepop", "logit_sx", "log_fx", "gx"),
                       calc_outputs = FALSE)

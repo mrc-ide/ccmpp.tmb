@@ -16,7 +16,7 @@ knitr::opts_chunk$set(
 ##+ setup
 devtools::load_all()
 
-## library(leapfrog)
+## library(ccmpp.tmb)
 library(dplyr)
 library(tidyr)
 library(forcats)
