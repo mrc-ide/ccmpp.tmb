@@ -1,34 +1,36 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# leapfrog
+# ccmpp.tmb
 
 <!-- badges: start -->
 
-[![Travis build
-status](https://travis-ci.org/mrc-ide/leapfrog.svg?branch=master)](https://travis-ci.org/mrc-ide/leapfrog)
-[![AppVeyor build
-status](https://ci.appveyor.com/api/projects/status/github/mrc-ide/leapfrog?branch=master&svg=true)](https://ci.appveyor.com/project/mrc-ide/leapfrog)
+[![R-CMD-check](https://github.com/mrc-ide/ccmpp.tmb/workflows/R-CMD-check/badge.svg)](https://github.com/mrc-ide/ccmpp.tmb/actions)
 [![Codecov test
-coverage](https://codecov.io/gh/mrc-ide/leapfrog/branch/master/graph/badge.svg)](https://codecov.io/gh/mrc-ide/leapfrog?branch=master)
+coverage](https://codecov.io/gh/mrc-ide/ccmpp.tmb/branch/master/graph/badge.svg)](https://codecov.io/gh/mrc-ide/ccmpp.tmb?branch=master)
 <!-- badges: end -->
 
-Leapfrog is a multistate population projection model for demographic and
-HIV epidemic estimation.
+`ccmpp.tmb` is an implementation of a cohort component model of
+population projection (CCMPP) and Wheldon *et al.*’s [Bayesian
+Population
+Reconstruction](https://www.tandfonline.com/doi/full/10.1080/01621459.2012.737729)
+in the R package [Template Model Builder
+(TMB)](https://kaskr.github.io/adcomp/_book/Introduction.html).
 
-The name *leapfrog* is in honor of
-[Professor](https://blogs.lshtm.ac.uk/alumni/2018/07/16/obituary-professor-basia-zaba/)
-Basia
-[Zaba](https://translate.google.co.uk/#view=home&op=translate&sl=pl&tl=en&text=%C5%BBaba).
+The package was created to explore the tractability of implementing
+Bayesian Population Reconstruction in TMB and prototype ideas for
+structuring integration of simulation models as templated C++ for
+flexible integration into TMB models and callable R functions with
+[Rcpp](https://www.rcpp.org/) wrappers.
 
 ## Installation
 
 Install the development version from
-[GitHub](https://github.com/mrc-ide/leapfrog) via devtools:
+[GitHub](https://github.com/mrc-ide/ccmpp.tmb) via devtools:
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("mrc-ide/leapfrog")
+devtools::install_github("mrc-ide/ccmpp.tmb")
 ```
 
 ## Example
@@ -37,10 +39,8 @@ Construct a sparse Leslie matrix:
 
 ``` r
 library(tidyverse)
-#> Warning: package 'tibble' was built under R version 3.6.2
-library(leapfrog)
+library(ccmpp.tmb)
 library(popReconstruct)
-#> Loading required package: coda
 
 data(burkina_faso_females)
 
@@ -125,7 +125,6 @@ Calculate a population projection in TMB. Carry forward 2000 values for
 two further periods to explore projections.
 
 ``` r
-
 basepop_init <- as.numeric(burkina.faso.females$baseline.pop.counts)
 
 sx_init <- burkina.faso.females$survival.proportions
@@ -270,6 +269,7 @@ agepop <- df %>%
             mean = mean(value),
             lower = quantile(value, 0.025),
             upper = quantile(value, 0.975))
+#> `summarise()` has grouped output by 'year', 'sex'. You can override using the `.groups` argument.
 
 totalpop <- df %>%
   group_by(year, sample) %>%
@@ -282,6 +282,7 @@ totalpop <- df %>%
             mean = mean(value),
             lower = quantile(value, 0.025),
             upper = quantile(value, 0.975))
+#> `summarise()` has grouped output by 'year'. You can override using the `.groups` argument.
 ```
 
 ``` r
@@ -321,7 +322,6 @@ ggplot(agepop, aes(age_group, mean, ymin = lower, ymax = upper, group = 1)) +
 Posterior distribution for TFR:
 
 ``` r
-
 asfr <- crossing(year = seq(1960, 2010, 5),
                  age_group = sprintf("%02d-%02d", 3:9*5, 3:9*5+4)) %>%
   mutate(init_asfr = as.vector(fx_init)) %>%
@@ -337,6 +337,7 @@ tfr <- asfr %>%
          mean = mean(value),
          lower = quantile(value, 0.025),
          upper = quantile(value, 0.975))
+#> `summarise()` has grouped output by 'year'. You can override using the `.groups` argument.
 
 ggplot(tfr, aes(year, mean, ymin = lower, ymax = upper)) +
   geom_ribbon(alpha = 0.2) +
@@ -352,7 +353,6 @@ ggplot(tfr, aes(year, mean, ymin = lower, ymax = upper)) +
 <img src="man/figures/README-asfr-1.png" width="60%" style="display: block; margin: auto;" />
 
 ``` r
-
 migrations <- crossing(year = seq(1960, 2010, 5),
                        age_lower = 0:16*5) %>%
   mutate(init_migrations = init_sim$migrations) %>%
@@ -368,6 +368,7 @@ total_migrations <- migrations %>%
          mean = mean(value),
          lower = quantile(value, 0.025),
          upper = quantile(value, 0.975))
+#> `summarise()` has grouped output by 'year'. You can override using the `.groups` argument.
 
 ggplot(total_migrations, aes(year, mean, ymin = lower, ymax = upper)) +
   geom_ribbon(alpha = 0.2) +
@@ -423,33 +424,34 @@ simulation via [Rcpp](http://dirk.eddelbuettel.com/code/rcpp.html) and
 
 ### Simulation model
 
-  - The CCMPP model is implemented as a sparse Leslie matrix formulation
+-   The CCMPP model is implemented as a sparse Leslie matrix formulation
     and using direct calculation of the projection in arrays so that
     interim outputs (deaths, births, migrations) are also saved. The
     array-based implementation appears to be faster.
-  - Class structure for popualtion projection model needs review.
-  - Specifying static dimensions for the state space may improve
+-   Class structure for popualtion projection model needs review.
+-   Specifying static dimensions for the state space may improve
     efficiency. This should be possible for common options (5x5 year,
     1x1 year) through templating.
-  - The model was implemented using *Eigen* containers following the
+-   The model was implemented using *Eigen* containers following the
     initial sparse Leslie matrix specification. However,
     multi-dimensional arrays in the *boost* library may be preferable.
 
 ### TMB
 
-  - Further investigation is needed about the portability of AD
+-   Further investigation is needed about the portability of AD
     objective function DLLs outside of the R environment.
 
 TMB model code and testing are implemented following templates from the
 [`TMBtools`](https://github.com/mlysy/TMBtools) package with guidance
 for package development with both TMB models and Rcpp code.
 
-  - To add a new TMB model, save the model template in the `src/TMB`
+-   To add a new TMB model, save the model template in the `src/TMB`
     with extension `.hpp`. The model name must match the file name. The
     signature is slightly different – see other `.hpp` files for
     example.
-  - Call `TMBtools::export_models()` to export the new TMB model to the
+-   Call `TMBtools::export_models()` to export the new TMB model to the
     meta-model list.
-  - When constructing the objective function with `TMB::MakeADFun`, use
-    `DLL= "leapfrog_TMBExports"` and add an additional value `model =
-    "<model_name>"` to the `data` list.
+-   When constructing the objective function with `TMB::MakeADFun`, use
+    `DLL= "ccmpp.tmb_TMBExports"` and add an additional value
+    `model = "<model_name>"` to the `data` list.
+

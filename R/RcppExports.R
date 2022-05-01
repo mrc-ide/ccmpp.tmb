@@ -30,8 +30,8 @@
 #'
 #' @importClassesFrom Matrix dgCMatrix
 #' @export
-make_leslie_matrixR <- function(sx, fx, srb, interval, fx_idx) {
-    .Call(`_leapfrog_make_leslie_matrixR`, sx, fx, srb, interval, fx_idx)
+make_leslie_matrixR <- function(sx, fx, srb, age_span, fx_idx) {
+    .Call(`_ccmpp_tmb_make_leslie_matrixR`, sx, fx, srb, age_span, fx_idx)
 }
 
 #' Simulate cohort component population projection
@@ -82,13 +82,13 @@ make_leslie_matrixR <- function(sx, fx, srb, interval, fx_idx) {
 #' all(pop_leslie == pop_proj$population)
 #'
 #' @export
-ccmppR <- function(basepop, sx, fx, gx, srb, interval, fx_idx) {
-    .Call(`_leapfrog_ccmppR`, basepop, sx, fx, gx, srb, interval, fx_idx)
+ccmppR <- function(basepop, sx, fx, gx, srb, age_span, fx_idx) {
+    .Call(`_ccmpp_tmb_ccmppR`, basepop, sx, fx, gx, srb, age_span, fx_idx)
 }
 
 #' @rdname ccmppR
 #' @export
-ccmpp_leslieR <- function(basepop, sx, fx, gx, srb, interval, fx_idx) {
-    .Call(`_leapfrog_ccmpp_leslieR`, basepop, sx, fx, gx, srb, interval, fx_idx)
+ccmpp_leslieR <- function(basepop, sx, fx, gx, srb, age_span, fx_idx) {
+    .Call(`_ccmpp_tmb_ccmpp_leslieR`, basepop, sx, fx, gx, srb, age_span, fx_idx)
 }
 

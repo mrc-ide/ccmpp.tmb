@@ -14,6 +14,7 @@ test_that("sparse leslie matrix returns expected matrix", {
   k <- interval / (1 + srb) * surv[1] * 0.5
   dbl_fert <- c(0, fert) + c(fert, 0) * surv[fx_idx + 0:7]
   lesM[1, fx_idx + -1:6] <- k * dbl_fert
+  lesM <- as(lesM, "dgCMatrix")
 
   expect_equal(make_leslie_matrixR(surv, fert, srb, interval, fx_idx), lesM)
 })

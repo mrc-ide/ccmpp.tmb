@@ -1,6 +1,6 @@
 ## usethis namespace: start
-#' @useDynLib leapfrog, .registration = TRUE
+#' @useDynLib ccmpp.tmb, .registration = TRUE
 #' @importFrom Rcpp sourceCpp
-#' @useDynLib leapfrog_TMBExports
+#' @useDynLib ccmpp.tmb_TMBExports
 ## usethis namespace: end
 NULL

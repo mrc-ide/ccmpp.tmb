@@ -14,25 +14,24 @@ knitr::opts_chunk$set(
 
 options(tidyverse.quiet = TRUE)
 ```
-# leapfrog
+# ccmpp.tmb
 
 <!-- badges: start -->
-[![Travis build status](https://travis-ci.org/mrc-ide/leapfrog.svg?branch=master)](https://travis-ci.org/mrc-ide/leapfrog)
-[![AppVeyor build status](https://ci.appveyor.com/api/projects/status/github/mrc-ide/leapfrog?branch=master&svg=true)](https://ci.appveyor.com/project/mrc-ide/leapfrog)
-[![Codecov test coverage](https://codecov.io/gh/mrc-ide/leapfrog/branch/master/graph/badge.svg)](https://codecov.io/gh/mrc-ide/leapfrog?branch=master)
+[![R-CMD-check](https://github.com/mrc-ide/ccmpp.tmb/workflows/R-CMD-check/badge.svg)](https://github.com/mrc-ide/ccmpp.tmb/actions)
+[![Codecov test coverage](https://codecov.io/gh/mrc-ide/ccmpp.tmb/branch/master/graph/badge.svg)](https://codecov.io/gh/mrc-ide/ccmpp.tmb?branch=master)
 <!-- badges: end -->
 
-Leapfrog is a multistate population projection model for demographic and HIV epidemic estimation.
+`ccmpp.tmb` is an implementation of a cohort component model of population projection (CCMPP) and Wheldon _et al._'s [Bayesian Population Reconstruction](https://www.tandfonline.com/doi/full/10.1080/01621459.2012.737729) in the R package [Template Model Builder (TMB)](https://kaskr.github.io/adcomp/_book/Introduction.html).
 
-The name _leapfrog_ is in honor of [Professor](https://blogs.lshtm.ac.uk/alumni/2018/07/16/obituary-professor-basia-zaba/) Basia [Zaba](https://translate.google.co.uk/#view=home&op=translate&sl=pl&tl=en&text=%C5%BBaba).
+The package was created to explore the tractability of implementing Bayesian Population Reconstruction in TMB and prototype ideas for structuring integration of simulation models as templated C++ for flexible integration into TMB models and callable R functions with [Rcpp](https://www.rcpp.org/) wrappers.
 
 ## Installation
 
-Install the development version from [GitHub](https://github.com/mrc-ide/leapfrog) via devtools:
+Install the development version from [GitHub](https://github.com/mrc-ide/ccmpp.tmb) via devtools:
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("mrc-ide/leapfrog")
+devtools::install_github("mrc-ide/ccmpp.tmb")
 ```
 
 ## Example
@@ -41,7 +40,7 @@ Construct a sparse Leslie matrix:
 
 ```{r example}
 library(tidyverse)
-library(leapfrog)
+library(ccmpp.tmb)
 library(popReconstruct)
 
 data(burkina_faso_females)
@@ -328,6 +327,7 @@ TMB model code and testing are implemented following templates from the
 [`TMBtools`](https://github.com/mlysy/TMBtools) package with guidance for package 
 development with both TMB models and Rcpp code. 
 
-  * To add a new TMB model, save the model template in the `src/TMB` with extension `.hpp`. The model name must match the file name. The signature is slightly different -- see other `.hpp` files for example.
-  * Call `TMBtools::export_models()` to export the new TMB model to the meta-model list.
-  * When constructing the objective function with `TMB::MakeADFun`, use `DLL= "leapfrog_TMBExports"` and add an additional value `model = "<model_name>"` to the `data` list.
+* To add a new TMB model, save the model template in the `src/TMB` with extension `.hpp`. The model name must match the file name. The signature is slightly different -- see other `.hpp` files for example.
+* Call `TMBtools::export_models()` to export the new TMB model to the meta-model list.
+* When constructing the objective function with `TMB::MakeADFun`, use `DLL= "ccmpp.tmb_TMBExports"` and add an additional value `model = "<model_name>"` to the `data` list.
+
