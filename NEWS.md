@@ -1,4 +1,4 @@
-# leapfrog 0.1.0
+# ccmpp.tmb 0.1.0
 
 * Rename package `ccmpp.tmb`.
 
